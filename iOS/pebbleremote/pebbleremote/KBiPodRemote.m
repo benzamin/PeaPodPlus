@@ -27,9 +27,22 @@
 #define IPOD_CURRENT_STATE_KEY @(0xFEF4)
 #define IPOD_SEQUENCE_NUMBER_KEY @(0xFEF3)
 
+#define FIND_PHONE_PLAY_SOUND_KEY @(0xFEE1)
+#define GET_BATTERY_STATUS_KEY @(0xFEE2)
+#define GET_NOTES_LIST_KEY @(0xFEE3)
+#define GET_SPECIFIC_NOTE_KEY @(0xFEE4)
+
+
 #define MAX_LABEL_LENGTH 20
 #define MAX_RESPONSE_COUNT 15
 #define MAX_OUTGOING_SIZE 105 // This allows some overhead.
+
+#define systemSoundIDNTink   1103
+#define systemSoundIDTonk    1104
+#define systemSoundIDNNewsFlash    1028
+#define systemSoundIDNoir    1029
+#define systemSoundIDUpdate    1036
+
 
 typedef enum {
     NowPlayingTitle,
@@ -52,6 +65,8 @@ typedef enum {
 - (void)pushLibraryResults:(NSArray*)results withOffset:(NSInteger)offset toWatch:(PBWatch*)watch type:(MPMediaGrouping)type;
 - (void)musicItemChanged:(MPMediaItem*)item;
 - (void)pushNowPlayingItemToWatch:(PBWatch*)watch detailed:(BOOL)detailed;
+- (void)sendStringArray:(NSArray *)stringArray withKey:(id)key;
+- (void)PushBatteryStatusToWatch;
 
 @end
 
@@ -68,6 +83,17 @@ typedef enum {
         //[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(musicItemChanged:) name:MPMusicPlayerControllerNowPlayingItemDidChangeNotification object:music_player];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(musicStateChanged:) name:MPMusicPlayerControllerPlaybackStateDidChangeNotification object:music_player];
         [music_player beginGeneratingPlaybackNotifications];
+        
+        NSMutableArray *arr = [[NSMutableArray alloc] init];
+        [arr addObject:[NSString stringWithFormat:@"Test Note 0>#^#Urban Terrorists Bangladesh, aka UrTBD, is the first intern! Here is the max text \n limit we are testing now!<> First off thanks for the app and httpebble, your works greatly appreciated. I'm having difficulty installing the .ipa on my phone. I can download it via itunes, but it refuses to install."]];
+        
+        for (int i=1;i<5;i++)
+        {
+            //[arr addObject:[NSString stringWithFormat:@"Test Note num %d#^#Urban  %d  Terrorists Bangladesh, aka UrTBD, is the first intern! Here is the max text \n limit we are testing now!<>", i,i]];
+            [arr addObject:[NSString stringWithFormat:@"Test Note %d 123456789012345678#^#Urban  %d  Terrorists Bangladesh, aka UrTBD, is the first intern! Here is the max text \n limit we are testing now!<> First off thanks for the app and httpebble, your works greatly appreciated. I'm having difficulty installing the .ipa on my phone. I can download it via itunes, but it refuses to install. It'll appear on my iphone 4s but it won't actually install. Oh, and I've managed to download via other methods it just refuses to install. Any suggestions? Thanks. Urban Terrorists Bangladesh, aka UrTBD, is the first intern! Here is the max text \n limit we are testing now!<>First off thanks for the app and httpebble, your works greatly appreciated. I'm having difficulty.1234567890123456789 First off thanks for the app and httpebble, your works greatly appreciated. I'm having difficulty.1234567890123456789First off thanks for the app and httpebble, your works greatly appreciated. I'm having difficulty.1234567890123456789First off thanks for the app and httpebble, your works greatly>>", i,i]];
+        }
+        
+        [[NSUserDefaults standardUserDefaults] setObject:arr forKey:@"Notes"];
     }
     return self;
 }
@@ -92,6 +118,7 @@ typedef enum {
     };
     NSLog(@"Current state: %@", [NSData dataWithBytes:metadata length:7]);
     [message_queue enqueue:@{IPOD_CURRENT_STATE_KEY: [NSData dataWithBytes:metadata length:7]}];
+
 }
 
 - (void)pushNowPlayingItemToWatch:(PBWatch *)watch detailed:(BOOL)detailed {
@@ -148,6 +175,12 @@ typedef enum {
     [self setWatch:watch];
 }
 
+- (void)pebbleCentral:(PBPebbleCentral*)central watchDidDisconnect:(PBWatch*)watch
+{
+    AudioServicesPlaySystemSound (systemSoundIDNoir);
+    NSLog(@"Watch disconnected %@",[watch name]);
+}
+
 - (void)setWatch:(PBWatch *)watch {
     NSLog(@"Have a watch.");
     if(![watch isConnected]) {
@@ -168,6 +201,7 @@ typedef enum {
             return YES;
         }];
     }];
+    AudioServicesPlaySystemSound (systemSoundIDNNewsFlash);
 }
 
 - (void)watch:(PBWatch *)watch receivedMessage:(NSDictionary *)message {
@@ -183,21 +217,152 @@ typedef enum {
         }
         last_sequence_number = sequence_number;
     }
-    if(message[IPOD_PLAY_TRACK_KEY]) {
+    if(message[IPOD_PLAY_TRACK_KEY])
+    {
         [self watch:watch playTrackFromMessage:message];
-    } else if(message[IPOD_REQUEST_LIBRARY_KEY]) {
-        if(message[IPOD_REQUEST_PARENT_KEY]) {
+    }
+    else if(message[IPOD_REQUEST_LIBRARY_KEY])
+    {
+        if(message[IPOD_REQUEST_PARENT_KEY])
+        {
             [self watch:watch wantsSubList:message];
-        } else {
+        }
+        else
+        {
             [self watch:watch wantsLibraryData:message];
         }
-    } else if(message[IPOD_NOW_PLAYING_KEY]) {
+    }
+    else if(message[IPOD_NOW_PLAYING_KEY])
+    {
         [self pushNowPlayingItemToWatch:watch detailed:[message[IPOD_NOW_PLAYING_KEY] boolValue]];
-    } else if(message[IPOD_CHANGE_STATE_KEY]) {
+    }
+    else if(message[IPOD_CHANGE_STATE_KEY])
+    {
         [self changeState:[message[IPOD_CHANGE_STATE_KEY] integerValue]];
     }
+    else if(message[FIND_PHONE_PLAY_SOUND_KEY])
+    {
+        
+       NSInteger state = [message[FIND_PHONE_PLAY_SOUND_KEY] integerValue];
+        switch(state) {
+            case 0:
+            {
+                AudioServicesPlaySystemSound (systemSoundIDUpdate);
+                [message_queue enqueue:@{FIND_PHONE_PLAY_SOUND_KEY: [NSNumber numberWithUint8:255]}];
+                break;
+            }
+            case 64:
+            {
+                 MPMusicPlayerController *app_music_player = [MPMusicPlayerController applicationMusicPlayer];
+                [app_music_player setVolume:[app_music_player volume] + 0.0625];
+                break;
+            }
+            case -64:
+            {
+                MPMusicPlayerController *app_music_player = [MPMusicPlayerController applicationMusicPlayer];
+                [app_music_player setVolume:[app_music_player volume] - 0.0625];
+                break;
+            }
+        }
+        
+        //[self performSelector:@selector(wakemeUp) withObject:nil afterDelay:7];
+    }
+    else if(message[GET_NOTES_LIST_KEY])
+    {
+        NSArray *notesArray = [[NSUserDefaults standardUserDefaults] arrayForKey:@"Notes"];
+        NSMutableArray *titleArray = [[NSMutableArray alloc] init];
+        for (NSString *note in notesArray)
+        {
+            NSString *substring = nil;
+            NSRange breakString = [note rangeOfString:@"#^#"];
+            if(breakString.location != NSNotFound) {
+                substring = [note substringToIndex:breakString.location];
+            }
+            [titleArray addObject:(([substring length] > 15) ? [substring substringToIndex:15] : substring)];//allowing max 15 characters note Title to prevent buffer overflow
+        }
+        [self sendStringArray:titleArray withKey:GET_NOTES_LIST_KEY];
+    }
+    else if(message[GET_SPECIFIC_NOTE_KEY])
+    {
+        NSArray *notesArray = [[NSUserDefaults standardUserDefaults] arrayForKey:@"Notes"];
+
+            NSString *substring = [notesArray objectAtIndex:[message[GET_SPECIFIC_NOTE_KEY] integerValue]];
+            NSRange breakString = [substring rangeOfString:@"#^#"];
+            if(breakString.location != NSNotFound) {
+                substring = [substring substringFromIndex:breakString.location];
+                 substring = [substring stringByReplacingOccurrencesOfString:@"#^#" withString:@""];
+            }
+        substring = (([substring length] > 999) ? [substring substringToIndex:999] : substring);//allowing max 999 characters note size 
+        NSData *note = [substring dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
+        size_t length = [note length];
+        uint8_t j = 0;
+        for(size_t i = 0; i < length; i += MAX_OUTGOING_SIZE-1) {
+            NSMutableData *outgoing = [[NSMutableData alloc] initWithCapacity:MAX_OUTGOING_SIZE];
+            [outgoing appendBytes:&j length:1];
+            [outgoing appendData:[note subdataWithRange:NSMakeRange(i, MIN(MAX_OUTGOING_SIZE-1, length - i))]];
+            [message_queue enqueue:@{GET_SPECIFIC_NOTE_KEY: outgoing}];
+            ++j;
+        }
+        NSLog(@"Wrote note %d:%@",[message[GET_SPECIFIC_NOTE_KEY] integerValue], substring);
+    }
+    else if(message[GET_BATTERY_STATUS_KEY])
+    {
+        [self PushBatteryStatusToWatch];
+    }
+}
+- (void)sendStringArray:(NSArray *)stringArray withKey:(id)key
+{
+    if (!our_watch)
+    {
+        NSLog(@"No watch to send the Notes List");
+    }
+    
+    NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+    
+    [stringArray enumerateObjectsUsingBlock:^(NSString *string, NSUInteger idx, BOOL *stop) {
+        dictionary[[NSNumber numberWithInt8:(int8_t)idx]] = string;
+    }];
+    
+    [our_watch appMessagesPushUpdate:dictionary onSent:^(PBWatch *watch, NSDictionary *update, NSError *error) {
+        NSLog(@"Dictionary %@ sent with No error:%@", dictionary, error);
+        
+        if (error)
+        {
+            NSLog(@"%@",[error description]);
+        }
+    }];
 }
 
+-(void)PushBatteryStatusToWatch
+{
+    [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
+    int levelInt = roundf([[UIDevice currentDevice] batteryLevel]*100);
+    int8_t batteryLevel = (int8_t)levelInt;
+    int8_t state = (int8_t)[[UIDevice currentDevice] batteryState];
+    uint8_t metadata[] = {
+        batteryLevel,
+        state
+    };
+    NSLog(@"Current battery status: %@ , percent:%zd, State:%zd", [NSData dataWithBytes:metadata length:2], batteryLevel, state);
+    [message_queue enqueue:@{GET_BATTERY_STATUS_KEY: [NSData dataWithBytes:metadata length:2]}];
+    [[UIDevice currentDevice] setBatteryMonitoringEnabled:NO];
+}
+
+/*-(void)wakemeUp
+{
+    [our_watch appMessagesLaunch:^(PBWatch *watch, NSError *error) {
+        if(error) {
+            NSLog(@"Error sending wakeUp Call: %@", error);
+        }
+    }];
+    [self performSelector:@selector(wakemeUp1) withObject:nil afterDelay:7];
+}
+-(void)wakemeUp1
+{
+    [message_queue enqueue:@{FIND_PHONE_PLAY_SOUND_KEY: [NSNumber numberWithUint8:255]}];
+    NSLog(@"sending vibe");
+}
+*/
 - (void)changeState:(NSInteger)state {
     switch(state) {
         case 0:

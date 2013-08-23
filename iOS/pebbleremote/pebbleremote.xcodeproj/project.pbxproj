@@ -29,6 +29,7 @@
 		3328FC351750FAFE00C38C1A /* KBiPodRemote.m in Sources */ = {isa = PBXBuildFile; fileRef = 3328FC341750FAFE00C38C1A /* KBiPodRemote.m */; };
 		3328FC5017534A5D00C38C1A /* KBPebbleMessageQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 3328FC4F17534A5D00C38C1A /* KBPebbleMessageQueue.m */; };
 		3328FC53175351C300C38C1A /* KBPebbleImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 3328FC52175351C300C38C1A /* KBPebbleImage.m */; };
+		4B1F7E3317BE1BAC00087861 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B1F7E3217BE1BAC00087861 /* AudioToolbox.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -62,6 +63,8 @@
 		3328FC4F17534A5D00C38C1A /* KBPebbleMessageQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KBPebbleMessageQueue.m; sourceTree = "<group>"; };
 		3328FC51175351C300C38C1A /* KBPebbleImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KBPebbleImage.h; sourceTree = "<group>"; };
 		3328FC52175351C300C38C1A /* KBPebbleImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KBPebbleImage.m; sourceTree = "<group>"; };
+		4B1F7E3017BE1B7300087861 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		4B1F7E3217BE1BAC00087861 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,6 +72,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4B1F7E3317BE1BAC00087861 /* AudioToolbox.framework in Frameworks */,
 				3328FC321750FADD00C38C1A /* MediaPlayer.framework in Frameworks */,
 				3328FC301750FA4100C38C1A /* MessageUI.framework in Frameworks */,
 				3328FC2E1750FA3B00C38C1A /* CoreMotion.framework in Frameworks */,
@@ -89,6 +93,8 @@
 		3328FBF01750F95800C38C1A = {
 			isa = PBXGroup;
 			children = (
+				4B1F7E3217BE1BAC00087861 /* AudioToolbox.framework */,
+				4B1F7E3017BE1B7300087861 /* AVFoundation.framework */,
 				3328FC021750F95800C38C1A /* pebbleremote */,
 				3328FBFB1750F95800C38C1A /* Frameworks */,
 				3328FBFA1750F95800C38C1A /* Products */,
@@ -264,7 +270,8 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Bingo Rimer (2RXZV6YNKW)";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -280,6 +287,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "-ObjC";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "A3E133E8-082E-4919-94FE-56D5D200A9F9";
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -313,6 +321,8 @@
 		3328FC1D1750F95800C38C1A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Bingo Rimer (2RXZV6YNKW)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../../../pebblekit/iOS\"",
@@ -322,6 +332,7 @@
 				GCC_PREFIX_HEADER = "pebbleremote/pebbleremote-Prefix.pch";
 				INFOPLIST_FILE = "pebbleremote/pebbleremote-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "A3E133E8-082E-4919-94FE-56D5D200A9F9";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;

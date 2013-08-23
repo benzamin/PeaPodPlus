@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <PebbleKit/PebbleKit.h>
+#include <AudioToolbox/AudioToolbox.h>
 
 @interface KBiPodRemote : NSObject<PBPebbleCentralDelegate>
 
