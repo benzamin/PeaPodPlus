@@ -6,6 +6,7 @@
 #include "ipod_state.h"
 #include "progress_bar.h"
 #include "common.h"
+#include "ipod.h"
 
 static Window window;
 static ActionBarLayer action_bar;

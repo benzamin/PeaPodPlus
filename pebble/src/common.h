@@ -15,6 +15,15 @@
 #define IPOD_STATE_CHANGE_KEY 0xFEF5
 #define IPOD_CURRENT_STATE_KEY 0xFEF4
 #define IPOD_SEQUENCE_NUMBER_KEY 0xFEF3
+	
+#define FIND_PHONE_PLAY_SOUND_KEY 0xFEE1
+#define GET_BATTERY_STATUS_KEY 0xFEE2
+	
+#define GET_NOTES_LIST_KEY 0xFEE3
+#define GET_SPECIFIC_NOTE_KEY 0xFEE4
+
+	
+#define MAX_INCOMING_SIZE 105 
 
 typedef enum {
     MPMediaGroupingTitle,
@@ -60,7 +69,7 @@ typedef enum {
 
 AppMessageResult ipod_message_out_get(DictionaryIterator **iter_out);
 void reset_sequence_number();
-
+char* itoa(int i);
 extern AppContextRef g_app_context;
 
 #endif

@@ -16,25 +16,53 @@ PBL_APP_INFO(MY_UUID,
              APP_INFO_STANDARD_APP);
 
 Window window;
+static bool is_peapod_running = false;
+static AppMessageCallbacksNode app_callbacks; 
+static void app_in_received(DictionaryIterator *received, void *context);
 
 void handle_init(AppContextRef ctx) {
     g_app_context = ctx;
     window_init(&window, "iPod");
     window_stack_push(&window, true /* Animated */);
     main_menu_init(&window);
-    init_library_menus();
-    ipod_state_init();
+    //init_library_menus();
+    //ipod_state_init();
     resource_init_current_app(&APP_RESOURCES);
 }
 
+void set_peapod_running(bool val)
+{
+	is_peapod_running = val;
+}
+
 void handle_timer(AppContextRef app_ctx, AppTimerHandle handle, uint32_t cookie) {
+//	if(!is_peapod_running)
+//	{
+//		return;
+//	}
     marquee_text_layer_tick();
     now_playing_animation_tick();
 }
 
 void tick_handler(AppContextRef app_ctx, PebbleTickEvent *event) {
+//	if(!is_peapod_running)
+//	{
+//		return;
+//	}
     ipod_state_tick();
     now_playing_tick();
+}
+
+static void app_in_received(DictionaryIterator *received, void* context) {
+    Tuple* tuple = dict_find(received, FIND_PHONE_PLAY_SOUND_KEY);
+    if(tuple) 
+	{
+		vibes_short_pulse();
+    }
+}
+static void app_in_dropped(void *context, AppMessageResult reason)
+{
+    //displayErrorMessage(appMessageResultToString(reason));
 }
 
 void pbl_main(void *params) {
@@ -52,5 +80,25 @@ void pbl_main(void *params) {
             }
         }
     };
+	  //  app_callbacks = (AppMessageCallbacksNode){
+      //  .callbacks = {
+            //.in_received = app_in_received,
+			//.out_sent = app_out_sent,
+            //.out_failed = app_out_failed,
+            //.in_dropped = app_in_dropped,
+        //}
+    //};
+    //app_message_register_callbacks(&app_callbacks);
     app_event_loop(params, &handlers);
+}
+
+static char *appMessageResultToString(AppMessageResult reason)
+{
+    switch (reason)
+    {
+        case APP_MSG_BUFFER_OVERFLOW:
+            return "buffer overflow";
+        default:
+            return "unknown error";
+    }
 }

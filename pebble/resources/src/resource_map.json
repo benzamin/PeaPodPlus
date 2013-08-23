@@ -1,44 +1,44 @@
 {
     "media": [
         {
-            "type": "png",
-            "defName": "ICON_VOLUME_UP",
-            "file": "images/volume_up.png"
+            "defName": "ALBUM_ART_MISSING",
+            "type": "raw",
+            "file": "data/album.gbmp"
         },
         {
-            "type": "png",
-            "defName": "ICON_VOLUME_DOWN",
-            "file": "images/volume_down.png"
-        },
-        {
-            "type": "png",
-            "defName": "ICON_PLAY",
-            "file": "images/play.png"
-        },
-        {
-            "type": "png",
-            "defName": "ICON_PAUSE",
-            "file": "images/pause.png"
-        },
-        {
-            "type": "png",
-            "defName": "ICON_FAST_FORWARD",
-            "file": "images/ff.png"
-        },
-        {
-            "type": "png",
-            "defName": "ICON_REWIND",
-            "file": "images/rw.png"
-        },
-        {
-            "type": "png",
             "defName": "APP_ICON",
+            "type": "png",
             "file": "images/icon.png"
         },
         {
-            "type": "raw",
-            "defName": "ALBUM_ART_MISSING",
-            "file": "data/album.gbmp"
+            "defName": "ICON_REWIND",
+            "type": "png",
+            "file": "images/rw.png"
+        },
+        {
+            "defName": "ICON_FAST_FORWARD",
+            "type": "png",
+            "file": "images/ff.png"
+        },
+        {
+            "defName": "ICON_PAUSE",
+            "type": "png",
+            "file": "images/pause.png"
+        },
+        {
+            "defName": "ICON_PLAY",
+            "type": "png",
+            "file": "images/play.png"
+        },
+        {
+            "defName": "ICON_VOLUME_DOWN",
+            "type": "png",
+            "file": "images/volume_down.png"
+        },
+        {
+            "defName": "ICON_VOLUME_UP",
+            "type": "png",
+            "file": "images/volume_up.png"
         }
     ],
     "friendlyVersion": "VERSION",
