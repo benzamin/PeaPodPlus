@@ -11,12 +11,14 @@
 #include "notes_menu.h"
 #include "pebble-cal.h"
 #include "battery_status.h"
+//#include "stopwatch.h"
 
 static void open_peapod_menu(int index, void* context);
 static void ping_my_phone(int index, void* context);
 static void open_notes_menu(int index, void* context);
 static void open_calender(int index, void* context);
 static void open_battery_status(int index, void* context);
+//static void open_stopwatch(int index, void* context);
 
 
 static SimpleMenuItem main_menu_items[] = {
@@ -32,6 +34,10 @@ static SimpleMenuItem main_menu_items[] = {
         .title = "Calender",
         .callback = open_calender,
     },
+	//{
+    //    .title = "Stopwatch",
+    //    .callback = open_stopwatch,
+    //},
 	{
         .title = "Ping my Phone",
         .callback = ping_my_phone,
@@ -57,7 +63,6 @@ void main_menu_init(Window* window) {
 }
 
 static void open_peapod_menu(int index, void* context) {
-	set_peapod_running(true);
 	init_library_menus();
     ipod_state_init();
     peapod_menu_init();
@@ -77,4 +82,9 @@ static void open_battery_status(int index, void* context)
 {
 	init_battery_status();
 }
-
+/*
+static void open_stopwatch(int index, void* context)
+{
+	init_stopwatch_window();
+}
+*/

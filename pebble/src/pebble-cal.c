@@ -4,7 +4,7 @@
 #include "pebble_fonts.h"
 #include <string.h>
 #include "xprintf.h"
-
+#include "common.h"
 // Languages
 #define LANG_DUTCH 0
 #define LANG_ENGLISH 1
@@ -115,6 +115,21 @@ typedef struct {
 Window cal_window;
 Layer monthLayer;
 TextLayer monthNameLayer;
+Window reminderWindow;
+
+
+TextLayer eventsReminderTextLayer;
+ScrollLayer events_scroll_layer;
+
+static AppMessageCallbacksNode app_callbacks;
+#define MAX_TEXT_LENGTH 999
+static char remindersString[MAX_TEXT_LENGTH];
+
+static void messageSentSuccessfullyCallback(DictionaryIterator *sent, void *context);
+static void messageSentWithErrorCallback(DictionaryIterator *failed, AppMessageResult reason, void *context);
+static void messageReceivedSuccessfullyCallback(DictionaryIterator *received, void *context);
+static void messageReceivedWithErrorCallback(void *context, AppMessageResult reason);
+static void requestEventsAndReminders();
 Date today;
 int displayedMonth, displayedYear;
 //GFont myFont;
@@ -569,15 +584,47 @@ void down_single_click_handler(ClickRecognizerRef recognizer, Window *window) {
 }
 
 void select_single_click_handler(ClickRecognizerRef recognizer, Window *window) {
+	//first remove existing text
+	memcpy(remindersString, "Loading..." , 10);
+	memset(remindersString + 10, 0 , MAX_TEXT_LENGTH-10);
+	
+	window_init(&reminderWindow, "Events+Reminders");
+    window_stack_push(&reminderWindow, true);
+    
+	const GRect max_text_bounds = GRect(0, 0, 144, 2000);
+    
+    text_layer_init(&eventsReminderTextLayer, max_text_bounds);
+    text_layer_set_text_color(&eventsReminderTextLayer, GColorBlack);
+    text_layer_set_background_color(&eventsReminderTextLayer, GColorWhite);
+    text_layer_set_text_alignment(&eventsReminderTextLayer, GTextAlignmentLeft);
+	text_layer_set_font(&eventsReminderTextLayer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+    text_layer_set_text(&eventsReminderTextLayer, remindersString);
+    
+  	//set up scroll layer
+  	scroll_layer_init(&events_scroll_layer, reminderWindow.layer.bounds);
+ 	scroll_layer_set_click_config_onto_window(&events_scroll_layer, &reminderWindow);
+	// Set the initial max size
+  	scroll_layer_set_content_size(&events_scroll_layer, max_text_bounds.size);
+    
+  	// Add the layers for display
+  	scroll_layer_add_child(&events_scroll_layer, &eventsReminderTextLayer.layer);
+    
+  	layer_add_child(&reminderWindow.layer, &events_scroll_layer.layer);
+    
+	requestEventsAndReminders();
+}
+static void long_clicked_select(ClickRecognizerRef recognizer, void *context)
+{
+    
 	displayedMonth = today.month;
 	displayedYear = today.year;
 	
 	updateMonthText();
 	layer_mark_dirty(&monthLayer);
 }
-
 void click_config_provider(ClickConfig **config, Window *window) {
 	config[BUTTON_ID_SELECT]->click.handler = (ClickHandler) select_single_click_handler;
+	config[BUTTON_ID_SELECT]->long_click.handler = (ClickHandler) long_clicked_select;
 	
 	config[BUTTON_ID_UP]->click.handler = (ClickHandler) up_single_click_handler;
 	config[BUTTON_ID_UP]->raw.up_handler = (ClickHandler) btn_up_handler;
@@ -631,11 +678,23 @@ static void window_load(Window* window) {
 	layer_add_child(window_get_root_layer(window), &monthLayer);
 	
 	window_set_click_config_provider(window, (ClickConfigProvider) click_config_provider);
+	
+    app_callbacks = (AppMessageCallbacksNode){
+        .callbacks = {
+            .out_sent = messageSentSuccessfullyCallback,
+            .out_failed = messageSentWithErrorCallback,
+            .in_received = messageReceivedSuccessfullyCallback,
+            .in_dropped = messageReceivedWithErrorCallback,
+        }
+    };
+    app_message_register_callbacks(&app_callbacks);
+    
+	
 }
 
 //void handle_deinit(AppContextRef ctx) {
 static void window_unload(Window* window) {
-	//fonts_unload_custom_font(myFont);
+	app_message_deregister_callbacks(&app_callbacks);
 }
 
 /* INIT */
@@ -649,18 +708,47 @@ void pebble_cal_init() {
     window_stack_push(&cal_window, true);
 }
 
+static void requestEventsAndReminders()
+{
+    DictionaryIterator *iter;
+    ipod_message_out_get(&iter);
+    if(!iter) return;
+    dict_write_int8(iter, GET_EVENTS_REMINDERS_KEY, 0);
+    app_message_out_send();
+    app_message_out_release();
+    
+}
 
+static void messageSentSuccessfullyCallback(DictionaryIterator *sent, void *context)
+{
+    
+}
 
-/*void pbl_main(void *params) {
- PebbleAppHandlers handlers = {
- .init_handler = &handle_init,
- .deinit_handler = &handle_deinit,
- 
- .tick_info = {
- .tick_handler = &handle_tick,
- .tick_units = DAY_UNIT
- }
- };
- app_event_loop(params, &handlers);
- }
- */
+static void messageSentWithErrorCallback(DictionaryIterator *failed, AppMessageResult reason, void *context)
+{
+    memcpy(remindersString, "Cant find Phone :(" , 18);
+	memset(remindersString + 18, 0 , MAX_TEXT_LENGTH-18);
+    layer_mark_dirty(&eventsReminderTextLayer.layer);
+}
+
+static void messageReceivedSuccessfullyCallback(DictionaryIterator *received, void *context)
+{
+	const int vert_scroll_text_padding = 20;
+	
+	Tuple* tuple = dict_find(received, GET_EVENTS_REMINDERS_KEY);
+    if(tuple)
+	{
+	    size_t offset = tuple->value->data[0] * (MAX_INCOMING_SIZE-1);
+        memcpy(remindersString + offset, tuple->value->data + 1, tuple->length - 1);
+        
+		// Trim text layer and scroll content to fit text box
+  		GSize max_size = text_layer_get_max_used_size(app_get_current_graphics_context(), &eventsReminderTextLayer);
+  		text_layer_set_size(&eventsReminderTextLayer, max_size);
+  		scroll_layer_set_content_size(&events_scroll_layer, GSize(144, max_size.h + vert_scroll_text_padding));
+		//layer_mark_dirty(&eventsReminderTextLayer.layer);
+    }
+}
+
+static void messageReceivedWithErrorCallback(void *context, AppMessageResult reason)
+{
+}

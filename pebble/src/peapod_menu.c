@@ -71,7 +71,6 @@ static void window_load(Window* window) {
 }
 
 static void window_unload(Window* window) {
-	set_peapod_running(false);
 }
 
 static void open_now_playing(int index, void* context) {

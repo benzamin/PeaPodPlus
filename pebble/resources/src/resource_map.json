@@ -1,6 +1,11 @@
 {
     "media": [
         {
+            "defName": "IMAGE_BUTTON_LABELS",
+            "type": "png",
+            "file": "images/buttons.png"
+        },
+        {
             "defName": "ALBUM_ART_MISSING",
             "type": "raw",
             "file": "data/album.gbmp"

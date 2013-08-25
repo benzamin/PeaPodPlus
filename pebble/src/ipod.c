@@ -7,6 +7,7 @@
 #include "marquee_text.h"
 #include "ipod_state.h"
 #include "now_playing.h"
+//#include "stopwatch.h"
 
 #define MY_UUID { 0x24, 0xCA, 0x78, 0x2C, 0xB3, 0x1F, 0x49, 0x04, 0x83, 0xE9, 0xCA, 0x51, 0x9C, 0x60, 0x10, 0x97 }
 PBL_APP_INFO(MY_UUID,
@@ -16,7 +17,6 @@ PBL_APP_INFO(MY_UUID,
              APP_INFO_STANDARD_APP);
 
 Window window;
-static bool is_peapod_running = false;
 static AppMessageCallbacksNode app_callbacks; 
 static void app_in_received(DictionaryIterator *received, void *context);
 
@@ -30,25 +30,16 @@ void handle_init(AppContextRef ctx) {
     resource_init_current_app(&APP_RESOURCES);
 }
 
-void set_peapod_running(bool val)
-{
-	is_peapod_running = val;
-}
+
 
 void handle_timer(AppContextRef app_ctx, AppTimerHandle handle, uint32_t cookie) {
-//	if(!is_peapod_running)
-//	{
-//		return;
-//	}
+
     marquee_text_layer_tick();
     now_playing_animation_tick();
+	//stopwatch_handle_timer(app_ctx, handle, cookie);
 }
 
 void tick_handler(AppContextRef app_ctx, PebbleTickEvent *event) {
-//	if(!is_peapod_running)
-//	{
-//		return;
-//	}
     ipod_state_tick();
     now_playing_tick();
 }

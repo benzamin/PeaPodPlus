@@ -1,10 +1,7 @@
-#include "now_playing.h"
+#include "battery_status.h"
 #include "pebble_os.h"
 #include "pebble_fonts.h"
 #include "pebble_app.h"
-#include "marquee_text.h"
-#include "ipod_state.h"
-#include "progress_bar.h"
 #include "common.h"
 
 static Window batteryWindow;
@@ -13,13 +10,13 @@ TextLayer percentage_layer;
 TextLayer status_layer;
 TextLayer text_battery_layer;
 Layer battery_layer;
-
+char *percentText;
 static int8_t batteryPercent;
 
 static AppMessageCallbacksNode app_callbacks;
 
-static void window_unload(Window* window);
-static void window_load(Window* window);
+static void window_unload_b(Window* window);
+static void window_load_b(Window* window);
 
 static void app_in_received(DictionaryIterator *received, void *context);
 static void app_out_failed(DictionaryIterator *failed, AppMessageResult reason, void *context);
@@ -36,13 +33,13 @@ static const char *batteryStatus[] = {
 void init_battery_status() {
     window_init(&batteryWindow, "Phone Battery Status");
     window_set_window_handlers(&batteryWindow, (WindowHandlers){
-        .unload = window_unload,
-        .load = window_load,
+        .unload = window_unload_b,
+        .load = window_load_b,
     });
     window_stack_push(&batteryWindow, true);
 }
 
-static void window_load(Window* window) {
+static void window_load_b(Window* window) {
 
     // Text labels
 	text_layer_init(&percentage_layer, GRect(10, 50, 134 /* width */, 35 /* height */));
@@ -84,8 +81,9 @@ static void window_load(Window* window) {
 	request_battery_data();
 }
 
-static void window_unload(Window* window) {
+static void window_unload_b(Window* window) {
     app_message_deregister_callbacks(&app_callbacks);
+	
 }
 
 void battery_layer_update_callback(Layer *me, GContext* ctx) {
@@ -124,14 +122,12 @@ static void app_in_received(DictionaryIterator *received, void* context) {
 		batteryPercent = (int8_t)(tuple->value->data[0]);
 		layer_mark_dirty(&battery_layer);
 
-		char *percentText;
-		percentText = itoa(batteryPercent);;
+		percentText = itoa(batteryPercent);
 		percentText = strcat(percentText, "%");
 		text_layer_set_text(&percentage_layer, percentText);
-		
+
 		int8_t battery_state = (int8_t)(tuple->value->data[1]);
-		text_layer_set_text(&text_battery_layer, batteryStatus[battery_state]);
-				
+		text_layer_set_text(&text_battery_layer, batteryStatus[battery_state]);				
 		
     }
 }

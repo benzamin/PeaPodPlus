@@ -21,7 +21,7 @@
 	
 #define GET_NOTES_LIST_KEY 0xFEE3
 #define GET_SPECIFIC_NOTE_KEY 0xFEE4
-
+#define GET_EVENTS_REMINDERS_KEY 0xFEE5
 	
 #define MAX_INCOMING_SIZE 105 
 
@@ -71,5 +71,8 @@ AppMessageResult ipod_message_out_get(DictionaryIterator **iter_out);
 void reset_sequence_number();
 char* itoa(int i);
 extern AppContextRef g_app_context;
-
+void itoa1(int i, char* a);
+void itoa2(int i, char* a);
+time_t get_pebble_time();
+void format_lap(time_t time, char* buffer);
 #endif
