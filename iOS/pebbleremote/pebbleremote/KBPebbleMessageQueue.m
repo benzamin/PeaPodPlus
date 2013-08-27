@@ -72,4 +72,9 @@
     }
 }
 
+-(void)dealloc
+{
+    self.watch = nil;
+}
+
 @end

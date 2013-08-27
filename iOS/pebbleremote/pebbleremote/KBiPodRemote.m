@@ -9,8 +9,10 @@
 #import "KBiPodRemote.h"
 #import <PebbleKit/PebbleKit.h>
 #import <MediaPlayer/MediaPlayer.h>
-#import "KBPebbleMessageQueue.h"
 #import "KBPebbleImage.h"
+#import <EventKit/EventKit.h>
+#import <EventKitUI/EventKitUI.h>
+
 
 #define IPOD_UUID { 0x24, 0xCA, 0x78, 0x2C, 0xB3, 0x1F, 0x49, 0x04, 0x83, 0xE9, 0xCA, 0x51, 0x9C, 0x60, 0x10, 0x97 }
 
@@ -27,11 +29,6 @@
 #define IPOD_CURRENT_STATE_KEY @(0xFEF4)
 #define IPOD_SEQUENCE_NUMBER_KEY @(0xFEF3)
 
-#define FIND_PHONE_PLAY_SOUND_KEY @(0xFEE1)
-#define GET_BATTERY_STATUS_KEY @(0xFEE2)
-#define GET_NOTES_LIST_KEY @(0xFEE3)
-#define GET_SPECIFIC_NOTE_KEY @(0xFEE4)
-
 
 #define MAX_LABEL_LENGTH 20
 #define MAX_RESPONSE_COUNT 15
@@ -43,6 +40,9 @@
 #define systemSoundIDNoir    1029
 #define systemSoundIDUpdate    1036
 
+#define NOTE_MAX_CHARACTER_LENGTH 698
+#define EVENTS_MAX_CHARACTER_LENGTH 498
+
 
 typedef enum {
     NowPlayingTitle,
@@ -52,12 +52,18 @@ typedef enum {
     NowPlayingNumbers,
 } NowPlayingType;
 
+
 @interface KBiPodRemote () {
     PBWatch *our_watch;
     MPMusicPlayerController *music_player;
-    KBPebbleMessageQueue *message_queue;
     uint32_t last_sequence_number;
+    int eventAndReminderCount;
+    KBViewController *kbVC;
 }
+
+@property (nonatomic, strong) EKEventStore *eventStore;
+@property (nonatomic, strong) NSMutableDictionary *eventsAndRemindersDict;
+
 
 - (void)setWatch:(PBWatch*)watch;
 - (void)watch:(PBWatch*)watch receivedMessage:(NSDictionary*)message;
@@ -66,17 +72,24 @@ typedef enum {
 - (void)musicItemChanged:(MPMediaItem*)item;
 - (void)pushNowPlayingItemToWatch:(PBWatch*)watch detailed:(BOOL)detailed;
 - (void)sendStringArray:(NSArray *)stringArray withKey:(id)key;
+-(void)sendString:(NSString*)string withKey:(id)key;
 - (void)PushBatteryStatusToWatch;
 
 @end
 
 @implementation KBiPodRemote
 
-- (id)init
+@synthesize message_queue;
+
+- (id)initWithViewControllerReference:(KBViewController*)vc
 {
     self = [super init];
     if (self) {
-        message_queue = [[KBPebbleMessageQueue alloc] init];
+        kbVC = vc;
+        self.message_queue = [[KBPebbleMessageQueue alloc] init];
+        self.eventStore = [[EKEventStore alloc] init];
+        eventAndReminderCount = 0;
+        self.eventsAndRemindersDict = [[NSMutableDictionary alloc] init];
         [[PBPebbleCentral defaultCentral] setDelegate:self];
         [self setWatch:[[PBPebbleCentral defaultCentral] lastConnectedWatch]];
         music_player = [MPMusicPlayerController iPodMusicPlayer];
@@ -85,15 +98,16 @@ typedef enum {
         [music_player beginGeneratingPlaybackNotifications];
         
         NSMutableArray *arr = [[NSMutableArray alloc] init];
-        [arr addObject:[NSString stringWithFormat:@"Test Note 0>#^#Urban Terrorists Bangladesh, aka UrTBD, is the first intern! Here is the max text \n limit we are testing now!<> First off thanks for the app and httpebble, your works greatly appreciated. I'm having difficulty installing the .ipa on my phone. I can download it via itunes, but it refuses to install."]];
+        [arr addObject:[NSString stringWithFormat:@"Test Note 0>#^#Urban 1  Terrorists \n------------------------\n Bangladesh, aka UrTBD, is the first intern! Here is the max text \n limit we are testing now!<> First off thanks for the app and httpebble, your works greatly appreciated. I'm having difficulty installing the .ipa on my phone. I can download it via itunes, but it refuses to install."]];
         
         for (int i=1;i<5;i++)
         {
             //[arr addObject:[NSString stringWithFormat:@"Test Note num %d#^#Urban  %d  Terrorists Bangladesh, aka UrTBD, is the first intern! Here is the max text \n limit we are testing now!<>", i,i]];
-            [arr addObject:[NSString stringWithFormat:@"Test Note %d 123456789012345678#^#Urban  %d  Terrorists Bangladesh, aka UrTBD, is the first intern! Here is the max text \n limit we are testing now!<> First off thanks for the app and httpebble, your works greatly appreciated. I'm having difficulty installing the .ipa on my phone. I can download it via itunes, but it refuses to install. It'll appear on my iphone 4s but it won't actually install. Oh, and I've managed to download via other methods it just refuses to install. Any suggestions? Thanks. Urban Terrorists Bangladesh, aka UrTBD, is the first intern! Here is the max text \n limit we are testing now!<>First off thanks for the app and httpebble, your works greatly appreciated. I'm having difficulty.1234567890123456789 First off thanks for the app and httpebble, your works greatly appreciated. I'm having difficulty.1234567890123456789First off thanks for the app and httpebble, your works greatly appreciated. I'm having difficulty.1234567890123456789First off thanks for the app and httpebble, your works greatly>>", i,i]];
+            [arr addObject:[NSString stringWithFormat:@"Test Note %d 123456789012345678#^#Urban  %d  Terrorists Bangladesh, \n______________\n....................................\n aka UrTBD, is the first intern! Here is the max text \n limit we are testing now!<> First off thanks for the app and httpebble, your works greatly appreciated. I'm having difficulty installing the .ipa on my phone. I can download it via itunes, but it refuses to install. It'll appear on my iphone 4s but it won't actually install. Oh, and I've managed to download via other methods it just refuses to install. Any suggestions? Thanks. Urban Terrorists Bangladesh, aka UrTBD, is the first intern! Here is the max text \n limit we are testing now!<>First off thanks for the app and httpebble, your works greatly appreciated. I'm having difficulty.1234567890123456789 First off thanks for the app and httpebble, your works greatly appreciated. I'm having difficulty.1234567890123456789First off thanks for the app and httpebble, your works greatly appreciated. I'm having difficulty.1234567890123456789First off thanks for the app and httpebble, your works greatly>>", i,i]];
         }
         
         [[NSUserDefaults standardUserDefaults] setObject:arr forKey:@"Notes"];
+        
     }
     return self;
 }
@@ -292,24 +306,53 @@ typedef enum {
                 substring = [substring substringFromIndex:breakString.location];
                  substring = [substring stringByReplacingOccurrencesOfString:@"#^#" withString:@""];
             }
-        substring = (([substring length] > 999) ? [substring substringToIndex:999] : substring);//allowing max 999 characters note size 
-        NSData *note = [substring dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
-        size_t length = [note length];
-        uint8_t j = 0;
-        for(size_t i = 0; i < length; i += MAX_OUTGOING_SIZE-1) {
-            NSMutableData *outgoing = [[NSMutableData alloc] initWithCapacity:MAX_OUTGOING_SIZE];
-            [outgoing appendBytes:&j length:1];
-            [outgoing appendData:[note subdataWithRange:NSMakeRange(i, MIN(MAX_OUTGOING_SIZE-1, length - i))]];
-            [message_queue enqueue:@{GET_SPECIFIC_NOTE_KEY: outgoing}];
-            ++j;
-        }
+        NSString *finalsString = (([substring length] > NOTE_MAX_CHARACTER_LENGTH) ? [substring substringToIndex:NOTE_MAX_CHARACTER_LENGTH] : substring);
+        [self sendString:finalsString withKey:GET_SPECIFIC_NOTE_KEY];
         NSLog(@"Wrote note %d:%@",[message[GET_SPECIFIC_NOTE_KEY] integerValue], substring);
     }
     else if(message[GET_BATTERY_STATUS_KEY])
     {
         [self PushBatteryStatusToWatch];
     }
+    else if(message[GET_EVENTS_REMINDERS_KEY])
+    {
+        [self checkEventStoreAccessForCalendar:YES];
+    }
+    else if(message[CAMERA_CAPTURE_KEY])
+    {
+        if(([UIApplication sharedApplication].applicationState == UIApplicationStateInactive) ||
+            ([UIApplication sharedApplication].applicationState == UIApplicationStateBackground))
+        {
+            [message_queue enqueue:@{CAMERA_CAPTURE_KEY: [NSNumber numberWithUint8:255]}];
+            return;
+        }
+        [kbVC initiateCamera];
+        [kbVC operateCamera:[message[CAMERA_CAPTURE_KEY] integerValue]];
+    }
+    
+    
+    
+    //check if this message is not camera capture key, that means user in other page and we can free the imagePickerController
+    if(!(message[CAMERA_CAPTURE_KEY]))
+    {
+        [kbVC removeCameraWindow];
+    }
+    
 }
+-(void)sendString:(NSString*)string withKey:(id)key
+{
+    NSData *note = [string dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
+    size_t length = [note length];
+    uint8_t j = 0;
+    for(size_t i = 0; i < length; i += MAX_OUTGOING_SIZE-1) {
+        NSMutableData *outgoing = [[NSMutableData alloc] initWithCapacity:MAX_OUTGOING_SIZE];
+        [outgoing appendBytes:&j length:1];
+        [outgoing appendData:[note subdataWithRange:NSMakeRange(i, MIN(MAX_OUTGOING_SIZE-1, length - i))]];
+        [message_queue enqueue:@{key: outgoing}];
+        ++j;
+    }
+}
+
 - (void)sendStringArray:(NSArray *)stringArray withKey:(id)key
 {
     if (!our_watch)
@@ -508,6 +551,217 @@ typedef enum {
         }
     }];
     NSLog(@"Sent message: %@", result);
+}
+
+
+#pragma mark -
+#pragma mark Access Calendar
+
+// Check the authorization status of our application for Calendar
+-(void)checkEventStoreAccessForCalendar:(BOOL)push
+{
+    EKAuthorizationStatus status = [EKEventStore authorizationStatusForEntityType:EKEntityTypeEvent];
+    
+    switch (status)
+    {
+            // Update our UI if the user has granted access to their Calendar
+        case EKAuthorizationStatusAuthorized:
+        {
+            [self accessGrantedForCalendar:push];
+            break;
+        }
+        // Prompt the user for access to Calendar if there is no definitive answer
+        case EKAuthorizationStatusNotDetermined:
+        {
+            [self requestCalendarAccess:push];
+            break;
+        }
+        // Display a message if the user has denied or restricted access to Calendar
+        case EKAuthorizationStatusDenied:
+        case EKAuthorizationStatusRestricted:
+        {
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Privacy Warning" message:@"Permission was not granted for Calendar, check Settings>Privacy>Calender/Reminder."
+                                                           delegate:nil
+                                                  cancelButtonTitle:@"OK"
+                                                  otherButtonTitles:nil];
+            [alert show];
+            if(push)[self sendString:@"Permission was not granted for Calendar, go to Settings>Privacy>Calender and Settings>Privacy>Rreminders to grant Persission. Also check for Settings>Mail,Contacts,Calenders>Calenders section to set the Default Calendar" withKey:GET_EVENTS_REMINDERS_KEY];
+        }
+            break;
+        default:
+            break;
+    }
+}
+
+
+// Prompt the user for access to their Calendar
+-(void)requestCalendarAccess:(BOOL)push
+{
+    [self.eventStore requestAccessToEntityType:EKEntityTypeEvent completion:^(BOOL granted, NSError *error)
+     {
+         if (granted)
+         {
+             KBiPodRemote * __weak weakSelf = self;
+             // Let's ensure that our code will be executed from the main queue
+             dispatch_async(dispatch_get_main_queue(), ^{
+                 // The user has granted access to their Calendar; let's populate our UI with all events occuring in the next 24 hours.
+                 [weakSelf accessGrantedForCalendar:push];
+             });
+         }
+         else
+         {
+             if(push)[self sendString:@"Permission was not granted for Calendar, go to Settings>Privacy>Calender and Settings>Privacy>Rreminders to grant Persission. Also check for Settings>Mail,Contacts,Calenders>Calenders section to set the Default Calendar" withKey:GET_EVENTS_REMINDERS_KEY];
+         }
+     }];
+}
+
+
+// This method is called when the user has granted permission to Calendar
+-(void)accessGrantedForCalendar:(BOOL)push
+{
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setTimeStyle:NSDateFormatterShortStyle];
+    [dateFormatter setDateStyle:NSDateFormatterMediumStyle];
+    NSLocale *frLocale = [NSLocale currentLocale];
+    [dateFormatter setLocale:frLocale];
+    
+    [dateFormatter setDoesRelativeDateFormatting:YES];
+    //[format setDateFormat:@"MMM dd, yyyy; HH:mm"];//TODO: can be customizable throu user settings
+    
+    // Fetch all events happening in the next 24 hours and put them into eventsList
+    NSMutableArray * eventsList = [self fetchEvents];
+    for(EKEvent *ekEv in eventsList)
+    {
+        NSString * event =  [NSString stringWithFormat:@"Event: %@%@\nTime: %@", ekEv.title, (ekEv.location ? [NSString stringWithFormat:@" in %@.", ekEv.location] : @"."), [dateFormatter stringFromDate:ekEv.startDate]];
+        [self.eventsAndRemindersDict setObject:event forKey:ekEv.startDate];
+        
+    }
+    eventAndReminderCount ++;
+    if(push)[self sortAndSendEventsReminders];
+
+    //Lets handle reminders now
+    __weak KBiPodRemote *weakSelf = self;
+    
+    [self.eventStore requestAccessToEntityType:EKEntityTypeReminder completion:^(BOOL granted, NSError *error)
+     {
+         if (!granted)
+         {
+             if(push)[self sendString:@"Permission was not granted for Calendar, go to Settings>Privacy>Calender and Settings>Privacy>Rreminders to grant Persission. Also check for Settings>Mail,Contacts,Calenders>Calenders section to set the Default Calendar" withKey:GET_EVENTS_REMINDERS_KEY];
+             return;
+         }
+         if (error)
+         {
+             if(push)[self sendString:@"Error getting Calender events and Reminders. Please check Settings>Privacy>Calender and Settings>Privacy>Rreminders to grant Persission. Also check for Settings>Mail,Contacts,Calenders>Calenders section to set the Default Calendar" withKey:GET_EVENTS_REMINDERS_KEY];
+             return;
+         }
+         
+         [weakSelf.eventStore fetchRemindersMatchingPredicate:[weakSelf.eventStore predicateForIncompleteRemindersWithDueDateStarting:nil
+                                                            ending:nil
+                                                            calendars:@[[weakSelf.eventStore defaultCalendarForNewReminders]]]
+                                                   completion:^(NSArray *reminders)
+          {
+              dispatch_async(dispatch_get_main_queue(), ^{
+                  if (reminders.count == 0)
+                  {
+                      NSLog(@"No reminders found");
+                      return;
+                  }
+                  
+                  NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+                  [dateFormatter setTimeStyle:NSDateFormatterShortStyle];
+                  [dateFormatter setDateStyle:NSDateFormatterMediumStyle];
+                  NSLocale *frLocale = [NSLocale currentLocale];
+                  [dateFormatter setLocale:frLocale];
+                  
+                  [dateFormatter setDoesRelativeDateFormatting:YES];
+                  //[format setDateFormat:@"MMM dd, yyyy; HH:mm"];//TODO: can be customizable throu user settings
+
+                  for(EKReminder *ev in reminders)
+                  {
+                      NSDate *reminderDate;
+                      NSString *dateString;
+                      if(ev.startDateComponents)
+                      {
+                          reminderDate = [[NSCalendar currentCalendar] dateFromComponents:ev.startDateComponents];
+                          dateString = [dateFormatter stringFromDate:reminderDate];
+                      }
+                      else
+                      {
+                          dateString = @"Not set";
+                      }
+                      NSString * reminder =  [NSString stringWithFormat:@"Reminder: %@%@\nTime: %@", ev.title, (ev.location ? [NSString stringWithFormat:@" in %@.", ev.location] : @"."), dateString];
+                      [self.eventsAndRemindersDict setObject:reminder forKey:(ev.startDateComponents ? reminderDate : [[NSDate date] dateByAddingTimeInterval: ((31*24*3600) + rand())])];
+                  }
+                  eventAndReminderCount ++;
+                  if(push)[self sortAndSendEventsReminders];
+                  
+                  
+              });
+          }];
+     }];
+    
+    
+  
+}
+- (void)setDoesRelativeDateFormatting:(BOOL)b
+{
+    
+}
+-(void)sortAndSendEventsReminders
+{
+    if(eventAndReminderCount < 2)
+    {
+        return;
+    }
+     //Finally write the response to the watch
+     NSArray * keys = [self.eventsAndRemindersDict allKeys];
+     
+     // sort it
+     NSArray * sorted_keys = [keys sortedArrayUsingSelector:@selector(compare:)];
+     
+    NSString *responseString = [[NSString alloc] init];
+     // now, access the values in order
+     for (NSDate * key in sorted_keys)
+     {
+         // get value
+         NSString * value = [NSString stringWithFormat:@"______________\n%@\n",[self.eventsAndRemindersDict objectForKey:key]];
+         responseString = [responseString stringByAppendingString:value];
+     }
+    NSString *finalsString = (([responseString length] > EVENTS_MAX_CHARACTER_LENGTH) ? [responseString substringToIndex:EVENTS_MAX_CHARACTER_LENGTH] : responseString);
+    [self sendString:finalsString withKey:GET_EVENTS_REMINDERS_KEY];
+    eventAndReminderCount = 0;
+    [self.eventsAndRemindersDict removeAllObjects];
+    
+     NSLog(@"\n%@",responseString);
+    
+    
+}
+
+// Fetch all events happening in the next 24 hours
+- (NSMutableArray *)fetchEvents
+{
+    NSDate *startDate = [NSDate date];
+    
+    //Create the end date components
+    NSDateComponents *tomorrowDateComponents = [[NSDateComponents alloc] init];
+    tomorrowDateComponents.day = 30;
+	
+    NSDate *endDate = [[NSCalendar currentCalendar] dateByAddingComponents:tomorrowDateComponents
+                                                                    toDate:startDate
+                                                                   options:0];
+	// We will only search the default calendar for our events
+	NSArray *calendarArray = [NSArray arrayWithObjects:self.eventStore.defaultCalendarForNewEvents, self.eventStore.defaultCalendarForNewReminders,nil];
+    
+    // Create the predicate
+	NSPredicate *predicate = [self.eventStore predicateForEventsWithStartDate:startDate
+                                                                      endDate:endDate
+                                                                    calendars:calendarArray];
+	
+	// Fetch all events that match the predicate
+	NSMutableArray *events = [NSMutableArray arrayWithArray:[self.eventStore eventsMatchingPredicate:predicate]];
+    
+	return events;
+    
 }
 
 @end

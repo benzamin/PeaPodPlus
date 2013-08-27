@@ -8,6 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@interface KBViewController : UIViewController
+@interface KBViewController : UIViewController <UINavigationControllerDelegate, UIImagePickerControllerDelegate>
 
+-(void)initiateCamera;
+-(void) removeCameraWindow;
+-(void)operateCamera:(NSInteger)operationKey;
 @end
