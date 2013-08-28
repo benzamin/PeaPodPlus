@@ -97,17 +97,6 @@ typedef enum {
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(musicStateChanged:) name:MPMusicPlayerControllerPlaybackStateDidChangeNotification object:music_player];
         [music_player beginGeneratingPlaybackNotifications];
         
-        NSMutableArray *arr = [[NSMutableArray alloc] init];
-        [arr addObject:[NSString stringWithFormat:@"Test Note 0>#^#Urban 1  Terrorists \n------------------------\n Bangladesh, aka UrTBD, is the first intern! Here is the max text \n limit we are testing now!<> First off thanks for the app and httpebble, your works greatly appreciated. I'm having difficulty installing the .ipa on my phone. I can download it via itunes, but it refuses to install."]];
-        
-        for (int i=1;i<5;i++)
-        {
-            //[arr addObject:[NSString stringWithFormat:@"Test Note num %d#^#Urban  %d  Terrorists Bangladesh, aka UrTBD, is the first intern! Here is the max text \n limit we are testing now!<>", i,i]];
-            [arr addObject:[NSString stringWithFormat:@"Test Note %d 123456789012345678#^#Urban  %d  Terrorists Bangladesh, \n______________\n....................................\n aka UrTBD, is the first intern! Here is the max text \n limit we are testing now!<> First off thanks for the app and httpebble, your works greatly appreciated. I'm having difficulty installing the .ipa on my phone. I can download it via itunes, but it refuses to install. It'll appear on my iphone 4s but it won't actually install. Oh, and I've managed to download via other methods it just refuses to install. Any suggestions? Thanks. Urban Terrorists Bangladesh, aka UrTBD, is the first intern! Here is the max text \n limit we are testing now!<>First off thanks for the app and httpebble, your works greatly appreciated. I'm having difficulty.1234567890123456789 First off thanks for the app and httpebble, your works greatly appreciated. I'm having difficulty.1234567890123456789First off thanks for the app and httpebble, your works greatly appreciated. I'm having difficulty.1234567890123456789First off thanks for the app and httpebble, your works greatly>>", i,i]];
-        }
-        
-        [[NSUserDefaults standardUserDefaults] setObject:arr forKey:@"Notes"];
-        
     }
     return self;
 }
@@ -283,10 +272,11 @@ typedef enum {
     }
     else if(message[GET_NOTES_LIST_KEY])
     {
-        NSArray *notesArray = [[NSUserDefaults standardUserDefaults] arrayForKey:@"Notes"];
+        NSArray *notesArray = [[NSUserDefaults standardUserDefaults] arrayForKey:NOTE_KEY];
         NSMutableArray *titleArray = [[NSMutableArray alloc] init];
-        for (NSString *note in notesArray)
+        for (int i = 0; i < 5; i++)
         {
+            NSString *note = [notesArray objectAtIndex:i];
             NSString *substring = nil;
             NSRange breakString = [note rangeOfString:@"#^#"];
             if(breakString.location != NSNotFound) {
@@ -298,7 +288,7 @@ typedef enum {
     }
     else if(message[GET_SPECIFIC_NOTE_KEY])
     {
-        NSArray *notesArray = [[NSUserDefaults standardUserDefaults] arrayForKey:@"Notes"];
+        NSArray *notesArray = [[NSUserDefaults standardUserDefaults] arrayForKey:NOTE_KEY];
 
             NSString *substring = [notesArray objectAtIndex:[message[GET_SPECIFIC_NOTE_KEY] integerValue]];
             NSRange breakString = [substring rangeOfString:@"#^#"];

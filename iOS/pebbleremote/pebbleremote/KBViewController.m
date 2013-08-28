@@ -8,6 +8,7 @@
 
 #import "KBViewController.h"
 #import "KBiPodRemote.h"
+#import "NotesListViewController.h"
 
 @interface KBViewController () {
     KBiPodRemote *remote;
@@ -21,11 +22,28 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    [self setTitle:@"Peapod+"];
+    
+    if(([[NSUserDefaults standardUserDefaults] objectForKey:NOTE_KEY]) == nil)
+    {
+        NSMutableArray *arr = [[NSMutableArray alloc] init];
+        [arr addObject:[NSString stringWithFormat:@"Pebble Note 1#^#1This is a test Note for shwoing in Pebble!"]];
+        [arr addObject:[NSString stringWithFormat:@"Pebble Note 2#^#2This is a test Note for shwoing in Pebble!"]];
+        [arr addObject:[NSString stringWithFormat:@"Pebble Note 3#^#3This is a test Note for shwoing in Pebble!"]];
+        [[NSUserDefaults standardUserDefaults] setObject:arr forKey:NOTE_KEY];
+    }
+    
+    
 	// Do any additional setup after loading the view, typically from a nib.
     remote = [[KBiPodRemote alloc] initWithViewControllerReference:self];
+    
 }
 
-
+-(IBAction)showNotesView:(id)sender
+{
+    NotesListViewController *nVC = [[NotesListViewController alloc] init];
+    [self.navigationController pushViewController:nVC animated:YES];
+}
 
 #pragma mark
 #pragma mark Camera Functions

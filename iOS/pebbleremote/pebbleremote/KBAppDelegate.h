@@ -16,4 +16,6 @@
 
 @property (strong, nonatomic) KBViewController *viewController;
 
+@property (nonatomic, strong) UINavigationController *navigationController;
+
 @end

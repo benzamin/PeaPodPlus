@@ -30,6 +30,12 @@
 		3328FC5017534A5D00C38C1A /* KBPebbleMessageQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 3328FC4F17534A5D00C38C1A /* KBPebbleMessageQueue.m */; };
 		3328FC53175351C300C38C1A /* KBPebbleImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 3328FC52175351C300C38C1A /* KBPebbleImage.m */; };
 		4B1F7E3317BE1BAC00087861 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B1F7E3217BE1BAC00087861 /* AudioToolbox.framework */; };
+		4B5CA87017C80450002623B7 /* EventKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B5CA86F17C80450002623B7 /* EventKit.framework */; };
+		4B5CA87217C80902002623B7 /* EventKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B5CA87117C80902002623B7 /* EventKitUI.framework */; };
+		4BF445A517CE4FB700E1A6BF /* NotesListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BF445A317CE4FB700E1A6BF /* NotesListViewController.m */; };
+		4BF445A617CE4FB700E1A6BF /* NotesListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4BF445A417CE4FB700E1A6BF /* NotesListViewController.xib */; };
+		4BF445AA17CE766800E1A6BF /* NoteDetailsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BF445A817CE766800E1A6BF /* NoteDetailsViewController.m */; };
+		4BF445AB17CE766800E1A6BF /* NoteDetailsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4BF445A917CE766800E1A6BF /* NoteDetailsViewController.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -65,6 +71,14 @@
 		3328FC52175351C300C38C1A /* KBPebbleImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KBPebbleImage.m; sourceTree = "<group>"; };
 		4B1F7E3017BE1B7300087861 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		4B1F7E3217BE1BAC00087861 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		4B5CA86F17C80450002623B7 /* EventKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKit.framework; path = System/Library/Frameworks/EventKit.framework; sourceTree = SDKROOT; };
+		4B5CA87117C80902002623B7 /* EventKitUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKitUI.framework; path = System/Library/Frameworks/EventKitUI.framework; sourceTree = SDKROOT; };
+		4BF445A217CE4FB700E1A6BF /* NotesListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotesListViewController.h; sourceTree = "<group>"; };
+		4BF445A317CE4FB700E1A6BF /* NotesListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NotesListViewController.m; sourceTree = "<group>"; };
+		4BF445A417CE4FB700E1A6BF /* NotesListViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = NotesListViewController.xib; sourceTree = "<group>"; };
+		4BF445A717CE766800E1A6BF /* NoteDetailsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoteDetailsViewController.h; sourceTree = "<group>"; };
+		4BF445A817CE766800E1A6BF /* NoteDetailsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NoteDetailsViewController.m; sourceTree = "<group>"; };
+		4BF445A917CE766800E1A6BF /* NoteDetailsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = NoteDetailsViewController.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -72,6 +86,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4B5CA87217C80902002623B7 /* EventKitUI.framework in Frameworks */,
+				4B5CA87017C80450002623B7 /* EventKit.framework in Frameworks */,
 				4B1F7E3317BE1BAC00087861 /* AudioToolbox.framework in Frameworks */,
 				3328FC321750FADD00C38C1A /* MediaPlayer.framework in Frameworks */,
 				3328FC301750FA4100C38C1A /* MessageUI.framework in Frameworks */,
@@ -93,6 +109,8 @@
 		3328FBF01750F95800C38C1A = {
 			isa = PBXGroup;
 			children = (
+				4B5CA87117C80902002623B7 /* EventKitUI.framework */,
+				4B5CA86F17C80450002623B7 /* EventKit.framework */,
 				4B1F7E3217BE1BAC00087861 /* AudioToolbox.framework */,
 				4B1F7E3017BE1B7300087861 /* AVFoundation.framework */,
 				3328FC021750F95800C38C1A /* pebbleremote */,
@@ -130,6 +148,12 @@
 		3328FC021750F95800C38C1A /* pebbleremote */ = {
 			isa = PBXGroup;
 			children = (
+				4BF445A217CE4FB700E1A6BF /* NotesListViewController.h */,
+				4BF445A317CE4FB700E1A6BF /* NotesListViewController.m */,
+				4BF445A717CE766800E1A6BF /* NoteDetailsViewController.h */,
+				4BF445A817CE766800E1A6BF /* NoteDetailsViewController.m */,
+				4BF445A917CE766800E1A6BF /* NoteDetailsViewController.xib */,
+				4BF445A417CE4FB700E1A6BF /* NotesListViewController.xib */,
 				3328FC0B1750F95800C38C1A /* KBAppDelegate.h */,
 				3328FC0C1750F95800C38C1A /* KBAppDelegate.m */,
 				3328FC141750F95800C38C1A /* KBViewController.h */,
@@ -217,6 +241,8 @@
 				3328FC111750F95800C38C1A /* Default@2x.png in Resources */,
 				3328FC131750F95800C38C1A /* Default-568h@2x.png in Resources */,
 				3328FC191750F95800C38C1A /* KBViewController.xib in Resources */,
+				4BF445A617CE4FB700E1A6BF /* NotesListViewController.xib in Resources */,
+				4BF445AB17CE766800E1A6BF /* NoteDetailsViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -233,6 +259,8 @@
 				3328FC351750FAFE00C38C1A /* KBiPodRemote.m in Sources */,
 				3328FC5017534A5D00C38C1A /* KBPebbleMessageQueue.m in Sources */,
 				3328FC53175351C300C38C1A /* KBPebbleImage.m in Sources */,
+				4BF445A517CE4FB700E1A6BF /* NotesListViewController.m in Sources */,
+				4BF445AA17CE766800E1A6BF /* NoteDetailsViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

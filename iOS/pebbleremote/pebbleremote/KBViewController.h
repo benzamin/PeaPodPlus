@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
+#define NOTE_KEY @"PebbleNotes"
+
 @interface KBViewController : UIViewController <UINavigationControllerDelegate, UIImagePickerControllerDelegate>
 
 -(void)initiateCamera;

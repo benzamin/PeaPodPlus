@@ -12,13 +12,46 @@
 
 @implementation KBAppDelegate
 
+@synthesize navigationController;
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    CGRect rect = [[UIScreen mainScreen] bounds];
+    UIWindow *window = [[UIWindow alloc] initWithFrame:rect];
+    [self setWindow:window];
+    
+    //  By default, UITableViewController populates its own 'view' property
+    //  with a new instance of UITableView, and makes itself the table view
+    //  instance's data source and delegate.
+    //
+    //MyListController *tableViewController = [[MyListController alloc]
+     //                                        initWithStyle:UITableViewStylePlain];
+    
+    KBViewController *kbVC = [[KBViewController alloc] initWithNibName:@"KBViewController" bundle:nil];
+    
+    //  UINavigationController is initialized with the view controller that
+    //  manages its initial, or root, view. The navigation controller sets its
+    //  own view property to point to the view of the view controller at the
+    //  top of its internal stack of view controllers.
+    //
+    UINavigationController *navController = [[UINavigationController alloc]
+                                             initWithRootViewController:kbVC];
+    
+    [self setNavigationController:navController];
+    [self.window setRootViewController:self.navigationController];
+    
+    [window addSubview:[navController view]];
+    [window makeKeyAndVisible];
+    
+    
+    
+    
+    
+   /* self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
     self.viewController = [[KBViewController alloc] initWithNibName:@"KBViewController" bundle:nil];
     self.window.rootViewController = self.viewController;
-    [self.window makeKeyAndVisible];
+    [self.window makeKeyAndVisible];*/
     return YES;
 }
 
