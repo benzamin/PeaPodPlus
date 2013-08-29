@@ -32,6 +32,8 @@
 		4B1F7E3317BE1BAC00087861 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B1F7E3217BE1BAC00087861 /* AudioToolbox.framework */; };
 		4B5CA87017C80450002623B7 /* EventKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B5CA86F17C80450002623B7 /* EventKit.framework */; };
 		4B5CA87217C80902002623B7 /* EventKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B5CA87117C80902002623B7 /* EventKitUI.framework */; };
+		4BBAC4C717CF55BB00DCCEE7 /* SetingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BBAC4C517CF55BA00DCCEE7 /* SetingsViewController.m */; };
+		4BBAC4C817CF55BB00DCCEE7 /* SetingsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4BBAC4C617CF55BA00DCCEE7 /* SetingsViewController.xib */; };
 		4BF445A517CE4FB700E1A6BF /* NotesListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BF445A317CE4FB700E1A6BF /* NotesListViewController.m */; };
 		4BF445A617CE4FB700E1A6BF /* NotesListViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4BF445A417CE4FB700E1A6BF /* NotesListViewController.xib */; };
 		4BF445AA17CE766800E1A6BF /* NoteDetailsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BF445A817CE766800E1A6BF /* NoteDetailsViewController.m */; };
@@ -73,6 +75,9 @@
 		4B1F7E3217BE1BAC00087861 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		4B5CA86F17C80450002623B7 /* EventKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKit.framework; path = System/Library/Frameworks/EventKit.framework; sourceTree = SDKROOT; };
 		4B5CA87117C80902002623B7 /* EventKitUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKitUI.framework; path = System/Library/Frameworks/EventKitUI.framework; sourceTree = SDKROOT; };
+		4BBAC4C417CF55BA00DCCEE7 /* SetingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SetingsViewController.h; sourceTree = "<group>"; };
+		4BBAC4C517CF55BA00DCCEE7 /* SetingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SetingsViewController.m; sourceTree = "<group>"; };
+		4BBAC4C617CF55BA00DCCEE7 /* SetingsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SetingsViewController.xib; sourceTree = "<group>"; };
 		4BF445A217CE4FB700E1A6BF /* NotesListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotesListViewController.h; sourceTree = "<group>"; };
 		4BF445A317CE4FB700E1A6BF /* NotesListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NotesListViewController.m; sourceTree = "<group>"; };
 		4BF445A417CE4FB700E1A6BF /* NotesListViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = NotesListViewController.xib; sourceTree = "<group>"; };
@@ -150,15 +155,18 @@
 			children = (
 				4BF445A217CE4FB700E1A6BF /* NotesListViewController.h */,
 				4BF445A317CE4FB700E1A6BF /* NotesListViewController.m */,
+				4BF445A417CE4FB700E1A6BF /* NotesListViewController.xib */,
 				4BF445A717CE766800E1A6BF /* NoteDetailsViewController.h */,
 				4BF445A817CE766800E1A6BF /* NoteDetailsViewController.m */,
 				4BF445A917CE766800E1A6BF /* NoteDetailsViewController.xib */,
-				4BF445A417CE4FB700E1A6BF /* NotesListViewController.xib */,
 				3328FC0B1750F95800C38C1A /* KBAppDelegate.h */,
 				3328FC0C1750F95800C38C1A /* KBAppDelegate.m */,
 				3328FC141750F95800C38C1A /* KBViewController.h */,
 				3328FC151750F95800C38C1A /* KBViewController.m */,
 				3328FC171750F95800C38C1A /* KBViewController.xib */,
+				4BBAC4C417CF55BA00DCCEE7 /* SetingsViewController.h */,
+				4BBAC4C517CF55BA00DCCEE7 /* SetingsViewController.m */,
+				4BBAC4C617CF55BA00DCCEE7 /* SetingsViewController.xib */,
 				3328FC031750F95800C38C1A /* Supporting Files */,
 				3328FC331750FAFE00C38C1A /* KBiPodRemote.h */,
 				3328FC341750FAFE00C38C1A /* KBiPodRemote.m */,
@@ -243,6 +251,7 @@
 				3328FC191750F95800C38C1A /* KBViewController.xib in Resources */,
 				4BF445A617CE4FB700E1A6BF /* NotesListViewController.xib in Resources */,
 				4BF445AB17CE766800E1A6BF /* NoteDetailsViewController.xib in Resources */,
+				4BBAC4C817CF55BB00DCCEE7 /* SetingsViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -261,6 +270,7 @@
 				3328FC53175351C300C38C1A /* KBPebbleImage.m in Sources */,
 				4BF445A517CE4FB700E1A6BF /* NotesListViewController.m in Sources */,
 				4BF445AA17CE766800E1A6BF /* NoteDetailsViewController.m in Sources */,
+				4BBAC4C717CF55BB00DCCEE7 /* SetingsViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

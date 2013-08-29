@@ -9,6 +9,8 @@
 #import "KBViewController.h"
 #import "KBiPodRemote.h"
 #import "NotesListViewController.h"
+#import "SetingsViewController.h"
+
 
 @interface KBViewController () {
     KBiPodRemote *remote;
@@ -31,6 +33,15 @@
         [arr addObject:[NSString stringWithFormat:@"Pebble Note 2#^#2This is a test Note for shwoing in Pebble!"]];
         [arr addObject:[NSString stringWithFormat:@"Pebble Note 3#^#3This is a test Note for shwoing in Pebble!"]];
         [[NSUserDefaults standardUserDefaults] setObject:arr forKey:NOTE_KEY];
+        [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:0.0] forKey:CAPTURE_DELAY_KEY];
+        [[NSUserDefaults standardUserDefaults] setBool:YES forKey:SOUND_ENABLED_KEY];
+        [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d", ConnectSystemSoundIDNNewsFlash] forKey:AUDIO_TYPE_CONNECT_KEY];
+        [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d", DisconnectSystemSoundIDNoir] forKey:AUDIO_TYPE_DISCONNECT_KEY];
+        [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d", PingSystemSoundIDUpdate] forKey:AUDIO_TYPE_PING_KEY];
+        
+        
+        
+        [[NSUserDefaults standardUserDefaults] synchronize];
     }
     
     
@@ -43,6 +54,12 @@
 {
     NotesListViewController *nVC = [[NotesListViewController alloc] init];
     [self.navigationController pushViewController:nVC animated:YES];
+}
+
+-(IBAction)showSettingsView:(id)sender
+{
+    SetingsViewController *sVC = [[SetingsViewController alloc] init];
+    [self.navigationController pushViewController:sVC animated:YES];
 }
 
 #pragma mark
@@ -111,7 +128,9 @@
         }
         case 127:
         {
-            [self takePhoto];
+            float timeout = [[[NSUserDefaults standardUserDefaults] objectForKey:CAPTURE_DELAY_KEY] floatValue];
+            if(timeout <= 0.1f) timeout = 0.1f;
+            [self performSelector:@selector(takePhoto) withObject:nil afterDelay:timeout];
             break;
         }
             

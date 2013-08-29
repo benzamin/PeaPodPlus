@@ -34,12 +34,6 @@
 #define MAX_RESPONSE_COUNT 15
 #define MAX_OUTGOING_SIZE 105 // This allows some overhead.
 
-#define systemSoundIDNTink   1103
-#define systemSoundIDTonk    1104
-#define systemSoundIDNNewsFlash    1028
-#define systemSoundIDNoir    1029
-#define systemSoundIDUpdate    1036
-
 #define NOTE_MAX_CHARACTER_LENGTH 698
 #define EVENTS_MAX_CHARACTER_LENGTH 498
 
@@ -180,7 +174,10 @@ typedef enum {
 
 - (void)pebbleCentral:(PBPebbleCentral*)central watchDidDisconnect:(PBWatch*)watch
 {
-    AudioServicesPlaySystemSound (systemSoundIDNoir);
+    if([[NSUserDefaults standardUserDefaults] boolForKey:SOUND_ENABLED_KEY])
+    {
+        AudioServicesPlayAlertSound([[[NSUserDefaults standardUserDefaults] objectForKey:AUDIO_TYPE_DISCONNECT_KEY] intValue]);
+    }
     NSLog(@"Watch disconnected %@",[watch name]);
 }
 
@@ -204,7 +201,11 @@ typedef enum {
             return YES;
         }];
     }];
-    AudioServicesPlaySystemSound (systemSoundIDNNewsFlash);
+    if([[NSUserDefaults standardUserDefaults] boolForKey:SOUND_ENABLED_KEY])
+    {
+        AudioServicesPlayAlertSound([[[NSUserDefaults standardUserDefaults] objectForKey:AUDIO_TYPE_CONNECT_KEY] intValue]);
+    }
+
 }
 
 - (void)watch:(PBWatch *)watch receivedMessage:(NSDictionary *)message {
@@ -250,7 +251,10 @@ typedef enum {
         switch(state) {
             case 0:
             {
-                AudioServicesPlaySystemSound (systemSoundIDUpdate);
+                if([[NSUserDefaults standardUserDefaults] boolForKey:SOUND_ENABLED_KEY])
+                {
+                    AudioServicesPlayAlertSound([[[NSUserDefaults standardUserDefaults] objectForKey:AUDIO_TYPE_PING_KEY] intValue]);
+                }
                 [message_queue enqueue:@{FIND_PHONE_PLAY_SOUND_KEY: [NSNumber numberWithUint8:255]}];
                 break;
             }
@@ -330,6 +334,8 @@ typedef enum {
         [kbVC removeCameraWindow];
     }
     
+    //NSLog(@"%@",[our_watch friendlyDescription]);
+    
 }
 -(void)sendString:(NSString*)string withKey:(id)key
 {
@@ -382,8 +388,8 @@ typedef enum {
     [message_queue enqueue:@{GET_BATTERY_STATUS_KEY: [NSData dataWithBytes:metadata length:2]}];
     [[UIDevice currentDevice] setBatteryMonitoringEnabled:NO];
 }
-
-/*-(void)wakemeUp
+/*
+-(void)wakemeUp
 {
     [our_watch appMessagesLaunch:^(PBWatch *watch, NSError *error) {
         if(error) {

@@ -20,6 +20,7 @@
 #define CAMERA_CAPTURE_KEY @(0xFEE6)
 
 
+
 @interface KBiPodRemote : NSObject<PBPebbleCentralDelegate>
 {
 }

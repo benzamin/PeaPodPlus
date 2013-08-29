@@ -8,7 +8,17 @@
 
 #import <UIKit/UIKit.h>
 
-#define NOTE_KEY @"PebbleNotes"
+#define NOTE_KEY @"BBPebbleNotes"
+#define CAPTURE_DELAY_KEY  @"BBCameraCaptureDelayKey"
+#define SOUND_ENABLED_KEY  @"BBSoundEnabledOrNotKey"
+#define AUDIO_TYPE_PING_KEY @"AudioTypePingKey"
+#define AUDIO_TYPE_CONNECT_KEY @"AudioTypeConnectKey"
+#define AUDIO_TYPE_DISCONNECT_KEY @"AudioTypeDCKey"
+
+#define ConnectSystemSoundIDNNewsFlash    1028
+#define DisconnectSystemSoundIDNoir    1029
+#define PingSystemSoundIDUpdate    1036
+
 
 @interface KBViewController : UIViewController <UINavigationControllerDelegate, UIImagePickerControllerDelegate>
 
