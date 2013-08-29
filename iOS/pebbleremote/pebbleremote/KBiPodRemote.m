@@ -274,7 +274,9 @@ typedef enum {
     {
         NSArray *notesArray = [[NSUserDefaults standardUserDefaults] arrayForKey:NOTE_KEY];
         NSMutableArray *titleArray = [[NSMutableArray alloc] init];
-        for (int i = 0; i < 5; i++)
+        int count = [notesArray count];
+        if(count >5) count = 5;
+        for (int i = 0; i < count; i++)
         {
             NSString *note = [notesArray objectAtIndex:i];
             NSString *substring = nil;
