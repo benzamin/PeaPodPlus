@@ -22,7 +22,7 @@ SimpleMenuSection sections[1];
 static char menuList[MAX_NOTES][MAX_NOTE_TITLE_LENGTH];
 SimpleMenuItem menuItems[MAX_NOTES];
 
-#define MAX_NOTE_TEXT_LENGTH 999
+#define MAX_NOTE_TEXT_LENGTH 699
 static char noteString[MAX_NOTE_TEXT_LENGTH];
 
 // Methods

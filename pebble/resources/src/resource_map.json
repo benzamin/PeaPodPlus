@@ -1,6 +1,21 @@
 {
     "media": [
         {
+            "defName": "ICON_CAMERA_SWITCH",
+            "type": "png",
+            "file": "images/switch.png"
+        },
+        {
+            "defName": "ICON_CAMERA_FLASH",
+            "type": "png",
+            "file": "images/flash.png"
+        },
+        {
+            "defName": "ICON_CAMERA_CAPTURE",
+            "type": "png",
+            "file": "images/camera.png"
+        },
+        {
             "defName": "IMAGE_BUTTON_LABELS",
             "type": "png",
             "file": "images/buttons.png"

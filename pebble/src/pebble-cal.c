@@ -122,7 +122,7 @@ TextLayer eventsReminderTextLayer;
 ScrollLayer events_scroll_layer;
 
 static AppMessageCallbacksNode app_callbacks;
-#define MAX_TEXT_LENGTH 999
+#define MAX_TEXT_LENGTH 499
 static char remindersString[MAX_TEXT_LENGTH];
 
 static void messageSentSuccessfullyCallback(DictionaryIterator *sent, void *context);

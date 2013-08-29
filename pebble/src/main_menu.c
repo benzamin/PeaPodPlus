@@ -4,7 +4,7 @@
 #include "pebble_fonts.h"
 #include "common.h"
 #include "library_menus.h"
-#include "ping_phone.h"
+//#include "ping_phone.h"
 #include "ipod.h"
 #include "ipod_state.h"
 #include "peapod_menu.h"
@@ -12,14 +12,15 @@
 #include "pebble-cal.h"
 #include "battery_status.h"
 //#include "stopwatch.h"
+#include "camera_capture.h"
 
 static void open_peapod_menu(int index, void* context);
-static void ping_my_phone(int index, void* context);
+//static void ping_my_phone(int index, void* context);
 static void open_notes_menu(int index, void* context);
 static void open_calender(int index, void* context);
 static void open_battery_status(int index, void* context);
 //static void open_stopwatch(int index, void* context);
-
+static void open_camera_capture(int index, void* context);
 
 static SimpleMenuItem main_menu_items[] = {
     {
@@ -38,13 +39,17 @@ static SimpleMenuItem main_menu_items[] = {
     //    .title = "Stopwatch",
     //    .callback = open_stopwatch,
     //},
-	{
-        .title = "Ping my Phone",
-        .callback = ping_my_phone,
-    },
+//	{
+//        .title = "Ping my Phone",
+//        .callback = ping_my_phone,
+//    },
 		{
-        .title = "Phone Battery %",
+        .title = "Find Phone+Battery",
         .callback = open_battery_status,
+    },
+	{
+        .title = "Camera Control",
+        .callback = open_camera_capture,
     },
 };
 
@@ -67,9 +72,9 @@ static void open_peapod_menu(int index, void* context) {
     ipod_state_init();
     peapod_menu_init();
 }
-static void ping_my_phone(int index, void* context) {
-    show_ping_phone();
-}
+//static void ping_my_phone(int index, void* context) {
+//    show_ping_phone();
+//}
 
 static void open_notes_menu(int index, void* context) {
     notes_menu_init();
@@ -88,3 +93,7 @@ static void open_stopwatch(int index, void* context)
 	init_stopwatch_window();
 }
 */
+static void open_camera_capture(int index, void* context)
+{
+	show_camera_capture();
+}

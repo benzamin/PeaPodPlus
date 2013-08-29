@@ -1,10 +1,6 @@
-#include "now_playing.h"
-#include "pebble_os.h"
+/*#include "ping_phone.h"
 #include "pebble_fonts.h"
 #include "pebble_app.h"
-#include "marquee_text.h"
-#include "ipod_state.h"
-#include "progress_bar.h"
 #include "common.h"
 
 static Window window;
@@ -59,12 +55,12 @@ static void window_load(Window* window) {
     action_bar_layer_set_icon(&action_bar, BUTTON_ID_UP, &icon_volume_up.bmp);
     
     // Text labels
-	text_layer_init(&Click_to_play_layer, GRect(10, 65, 100 /* width */, 20 /* height */));
+	text_layer_init(&Click_to_play_layer, GRect(10, 65, 100 , 20 
     text_layer_set_text(&Click_to_play_layer, "Press to Play >");
     text_layer_set_text_alignment(&Click_to_play_layer, GTextAlignmentCenter);
     layer_add_child(window_get_root_layer(window), &Click_to_play_layer.layer);
 	
-	text_layer_init(&Sound_Played_layer, GRect(10, 100, 100 /* width */, 20 /* height */));
+	text_layer_init(&Sound_Played_layer, GRect(10, 100, 100));
     text_layer_set_text(&Sound_Played_layer, "");
     text_layer_set_text_alignment(&Sound_Played_layer, GTextAlignmentCenter);
     layer_add_child(window_get_root_layer(window), &Sound_Played_layer.layer);
@@ -129,5 +125,6 @@ static void app_in_received(DictionaryIterator *received, void* context) {
 }
 static void app_out_failed(DictionaryIterator *failed, AppMessageResult reason, void *context)
 {
-	text_layer_set_text(&Sound_Played_layer, "Can't Find Phone :(");
+	text_layer_set_text(&Sound_Played_layer, "Not Connected :(");
 }
+*/
