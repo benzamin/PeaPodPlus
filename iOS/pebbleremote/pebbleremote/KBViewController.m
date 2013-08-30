@@ -91,8 +91,11 @@
 
 -(void) removeCameraWindow
 {
-    self.imagePickerController = nil;
-    [self dismissViewControllerAnimated:YES completion:NULL];
+    if(self.imagePickerController != nil)
+    {
+        self.imagePickerController = nil;
+        [self dismissViewControllerAnimated:YES completion:NULL];
+    }
 }
 -(void)operateCamera:(NSInteger)operationKey
 {

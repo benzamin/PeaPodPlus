@@ -15,6 +15,7 @@
 
 
 #define IPOD_UUID { 0x24, 0xCA, 0x78, 0x2C, 0xB3, 0x1F, 0x49, 0x04, 0x83, 0xE9, 0xCA, 0x51, 0x9C, 0x60, 0x10, 0x97 }
+#define HTTP_UUID { 0x91, 0x41, 0xB6, 0x28, 0xBC, 0x89, 0x49, 0x8E, 0xB1, 0x47, 0x04, 0x9F, 0x49, 0xC0, 0x99, 0xAD }
 
 #define IPOD_RECONNECT_KEY @(0xFEFF)
 #define IPOD_REQUEST_LIBRARY_KEY @(0xFEFE)
@@ -53,6 +54,17 @@ typedef enum {
     uint32_t last_sequence_number;
     int eventAndReminderCount;
     KBViewController *kbVC;
+    id updateHandler;
+    
+    //httpebble
+    BOOL hasPendingLocationRequest;
+    BOOL isActive;
+    
+    // Assorted managers
+    NSManagedObjectContext *managedObjectContext; // Because Core Data.
+    NSPersistentStoreCoordinator *persistentStoreCoordinator;
+    NSManagedObjectModel *managedObjectModel;
+    CLLocationManager *locationManager;
 }
 
 @property (nonatomic, strong) EKEventStore *eventStore;
@@ -60,7 +72,7 @@ typedef enum {
 
 
 - (void)setWatch:(PBWatch*)watch;
-- (void)watch:(PBWatch*)watch receivedMessage:(NSDictionary*)message;
+- (BOOL)watch:(PBWatch*)watch receivedMessage:(NSDictionary*)message;
 - (void)watch:(PBWatch*)watch wantsLibraryData:(NSDictionary*)request;
 - (void)pushLibraryResults:(NSArray*)results withOffset:(NSInteger)offset toWatch:(PBWatch*)watch type:(MPMediaGrouping)type;
 - (void)musicItemChanged:(MPMediaItem*)item;
@@ -68,6 +80,18 @@ typedef enum {
 - (void)sendStringArray:(NSArray *)stringArray withKey:(id)key;
 -(void)sendString:(NSString*)string withKey:(id)key;
 - (void)PushBatteryStatusToWatch;
+
+//Httpebble
+- (BOOL)handleWatch:(PBWatch*)watch HTTPRequestFromMessage:(NSDictionary *)message;
+- (BOOL)handleWatch:(PBWatch*)watch storeKeyFromMessage:(NSDictionary*)message;
+- (BOOL)handleWatch:(PBWatch*)watch getKeyFromMessage:(NSDictionary*)message;
+- (BOOL)handleWatch:(PBWatch*)watch saveFromMessage:(NSDictionary*)message;
+- (BOOL)handleWatch:(PBWatch *)watch deleteFromMessage:(NSDictionary *)message;
+- (BOOL)handleWatch:(PBWatch *)watch timeFromMessage:(NSDictionary *)message;
+- (BOOL)handleWatch:(PBWatch *)watch locationFromMessage:(NSDictionary *)message;
+- (KBPebbleValue*)getStoredValueForApp:(NSNumber*)appID withKey:(NSNumber*)key;
+- (void)storeId:(id)value InPebbleValue:(KBPebbleValue*)pv;
+- (id)getIdFromPebbleValue:(KBPebbleValue*)pv;
 
 @end
 
@@ -90,6 +114,41 @@ typedef enum {
         //[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(musicItemChanged:) name:MPMusicPlayerControllerNowPlayingItemDidChangeNotification object:music_player];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(musicStateChanged:) name:MPMusicPlayerControllerPlaybackStateDidChangeNotification object:music_player];
         [music_player beginGeneratingPlaybackNotifications];
+        
+        //httpebble
+        // Set up location management.
+        locationManager = [[CLLocationManager alloc] init];
+        locationManager.delegate = self;
+        locationManager.distanceFilter = kCLDistanceFilterNone;
+        locationManager.desiredAccuracy = kCLLocationAccuracyKilometer;
+        hasPendingLocationRequest = NO;
+        
+        // Set up the object model.
+        NSURL *modelURL = [[NSBundle mainBundle] URLForResource:@"PebbleModel" withExtension:@"momd"];
+        managedObjectModel = [[NSManagedObjectModel alloc] initWithContentsOfURL:modelURL];
+        // Set up the persistent store coordinator
+        NSURL *storeURL = [[[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject] URLByAppendingPathComponent:@"pebble-kv.sqlite"];
+        persistentStoreCoordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:managedObjectModel];
+        NSError *error;
+        [persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:nil error:&error];
+        if(error) {
+            NSLog(@"Something went very wrong. Deleting key-value store.");
+            NSLog(@"%@", error);
+            [[NSFileManager defaultManager] removeItemAtURL:storeURL error:nil];
+            error = nil;
+            [persistentStoreCoordinator addPersistentStoreWithType:NSSQLiteStoreType configuration:nil URL:storeURL options:nil error:&error];
+            if(error) {
+                NSLog(@"%@", error);
+                abort();
+            }
+        }
+        
+        
+        managedObjectContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
+        [managedObjectContext setPersistentStoreCoordinator:persistentStoreCoordinator];
+
+        
+        
         
     }
     return self;
@@ -183,22 +242,37 @@ typedef enum {
 
 - (void)setWatch:(PBWatch *)watch {
     NSLog(@"Have a watch.");
+    if(watch == nil) {
+        return;
+    }
     if(![watch isConnected]) {
         NSLog(@"Not connected.");
         return;
     }
-    [watch appMessagesGetIsSupported:^(PBWatch *watch, BOOL isAppMessagesSupported) {
-        NSLog(@"Useful watch %@ connected.", [watch name]);
-        last_sequence_number = 0;
-        our_watch = watch;
-        message_queue.watch = watch;
+    
+    last_sequence_number = 0;
+    our_watch = watch;
+    message_queue.watch = watch;
+    
+    [self connect];//TODO: call it from original viewcontroller
+
+}
+- (void)connect {
+    [our_watch appMessagesGetIsSupported:^(PBWatch *watch, BOOL isAppMessagesSupported) {
+        NSLog(@"Useful watch %@ connected.", [our_watch name]);
         // Send a message to make sure it's awake and that we have a session.
         uint8_t uuid[] = IPOD_UUID;
-        [watch appMessagesSetUUID:[NSData dataWithBytes:uuid length:16]];
-        [watch appMessagesPushUpdate:@{IPOD_RECONNECT_KEY: @(1)} onSent:nil];
-        [watch appMessagesAddReceiveUpdateHandler:^BOOL(PBWatch *watch, NSDictionary *update) {
-            [self watch:watch receivedMessage:update];
-            return YES;
+        [our_watch appMessagesSetUUID:[NSData dataWithBytes:uuid length:16]];
+        //[watch appMessagesPushUpdate:@{IPOD_RECONNECT_KEY: @(1)} onSent:nil];// may be not needed for Peapod
+        [our_watch appMessagesPushUpdate:@{HTTP_CONNECT_KEY: [NSNumber numberWithUint8:YES]} onSent:^(PBWatch *watch, NSDictionary *update, NSError *error) {
+            if(!error) {
+                NSLog(@"Pushed post-reconnect update.");
+            } else {
+                NSLog(@"Error pushing post-reconnect update: %@", error);
+            }
+        }];
+        updateHandler = [watch appMessagesAddReceiveUpdateHandler:^BOOL(PBWatch *watch, NSDictionary *update) {
+            return [self watch:our_watch receivedMessage:update];;
         }];
     }];
     if([[NSUserDefaults standardUserDefaults] boolForKey:SOUND_ENABLED_KEY])
@@ -208,8 +282,48 @@ typedef enum {
 
 }
 
-- (void)watch:(PBWatch *)watch receivedMessage:(NSDictionary *)message {
+- (void)disconnect {
+    if(!our_watch) return;
+    [our_watch closeSession:nil];
+    if(updateHandler) {
+        [our_watch appMessagesRemoveUpdateHandler:updateHandler];
+        updateHandler = nil;
+    }
+    if(_delegate && [_delegate respondsToSelector:@selector(pebbleThing:disconnected:)]) {
+        [_delegate pebbleThing:self disconnected:our_watch];
+    }
+    [self setWatch:nil];
+}
+
+- (BOOL)watch:(PBWatch *)watch receivedMessage:(NSDictionary *)message
+{
     NSLog(@"Received message: %@", message);
+    
+    //First check for HTTTPEBBLE keys
+    if([message objectForKey:HTTP_URL_KEY]) {
+        return [self handleWatch:watch HTTPRequestFromMessage:message];
+    }
+    if([message objectForKey:HTTP_COOKIE_LOAD_KEY]) {
+        return [self handleWatch:watch getKeyFromMessage:message];
+    }
+    if([message objectForKey:HTTP_COOKIE_STORE_KEY]) {
+        return [self handleWatch:watch storeKeyFromMessage:message];
+    }
+    if([message objectForKey:HTTP_COOKIE_FSYNC_KEY]) {
+        return [self handleWatch:watch saveFromMessage:message];
+    }
+    if([message objectForKey:HTTP_COOKIE_DELETE_KEY]) {
+        return [self handleWatch:watch deleteFromMessage:message];
+    }
+    if([message objectForKey:HTTP_TIME_KEY]) {
+        return [self handleWatch:watch timeFromMessage:message];
+    }
+    if([message objectForKey:HTTP_LOCATION_KEY]) {
+        return [self handleWatch:watch locationFromMessage:message];
+    }
+
+    //Now handle the Peapod Keys
+
     uint32_t sequence_number = [message[IPOD_SEQUENCE_NUMBER_KEY] uint32Value];
     if(sequence_number == 0xFFFFFFFF) {
         NSLog(@"Reset sequence numbers.");
@@ -217,7 +331,7 @@ typedef enum {
     } else {
         if(sequence_number <= last_sequence_number) {
             NSLog(@"Discarding duplicate message.");
-            return;
+            return NO;
         }
         last_sequence_number = sequence_number;
     }
@@ -320,22 +434,20 @@ typedef enum {
             ([UIApplication sharedApplication].applicationState == UIApplicationStateBackground))
         {
             [message_queue enqueue:@{CAMERA_CAPTURE_KEY: [NSNumber numberWithUint8:255]}];
-            return;
+            return YES;
         }
         [kbVC initiateCamera];
         [kbVC operateCamera:[message[CAMERA_CAPTURE_KEY] integerValue]];
     }
     
-    
-    
-    //check if this message is not camera capture key, that means user in other page and we can free the imagePickerController
+    //check if these message is not camera capture key, that means user in other page and we can free the imagePickerController
     if(!(message[CAMERA_CAPTURE_KEY]))
     {
         [kbVC removeCameraWindow];
     }
     
     //NSLog(@"%@",[our_watch friendlyDescription]);
-    
+    return YES;
 }
 -(void)sendString:(NSString*)string withKey:(id)key
 {
@@ -761,5 +873,373 @@ typedef enum {
 	return events;
     
 }
+
+#pragma mark
+#pragma mark
+#pragma mark HTTPEBBLE methods starting 
+//--------------------------------------------------------------------------------------
+
+
+- (void)saveKeyValueData {
+    [managedObjectContext save:nil];
+}
+
+#pragma mark CLLocationManager delegate
+
+NSNumber* floatAsPBNumber(float value) {
+    return [NSNumber numberWithUint32:(*(uint32_t*)&value)];
+}
+
+- (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations {
+    if(!hasPendingLocationRequest) return;
+    CLLocation *location = [locations lastObject];
+    if(abs([location.timestamp timeIntervalSinceNow]) < 60) {
+        hasPendingLocationRequest = NO;
+        [locationManager stopUpdatingLocation];
+        
+        // Send a message back.
+        NSDictionary *response = @{HTTP_LOCATION_KEY: floatAsPBNumber(location.horizontalAccuracy),
+                                   HTTP_LATITUDE_KEY: floatAsPBNumber(location.coordinate.latitude),
+                                   HTTP_LONGITUDE_KEY: floatAsPBNumber(location.coordinate.longitude),
+                                   HTTP_ALTITUDE_KEY: floatAsPBNumber(location.altitude)
+                                   };
+        NSLog(@"Sending location dictionary.");
+        [our_watch appMessagesPushUpdate:response onSent:nil];
+    }
+}
+
+
+#pragma mark Other stuff
+
+void httpErrorResponse(PBWatch* watch, NSNumber* success_key, NSInteger status, NSNumber* app_id) {
+    NSDictionary *error_response = @{
+                                     success_key: [NSNumber numberWithUint8:NO],
+                                     HTTP_STATUS_KEY: [NSNumber numberWithUint16:status],
+                                     HTTP_APP_ID_KEY: app_id
+                                     };
+    NSLog(@"Sending error response: %@", error_response);
+    [watch appMessagesPushUpdate:error_response onSent:^(PBWatch *watch, NSDictionary *update, NSError *error) {
+        if(error)
+            NSLog(@"Error response failed: %@", error);
+    }];
+}
+
+
+- (void)handleHTTPResponse:(NSURLResponse*)response data:(NSData*)data error:(NSError*)error forWatch:(PBWatch*)watch message:(NSDictionary*)message sk:(NSNumber*)success_key {
+    NSNumber* cookie = [message objectForKey:HTTP_COOKIE_KEY];
+    NSNumber* app_id = [message objectForKey:HTTP_APP_ID_KEY];
+    if(!app_id) {
+        app_id = @(0);
+    }
+    NSLog(@"Got HTTP response.");
+    NSInteger status_code = [(NSHTTPURLResponse*)response statusCode];
+    if(error) {
+        NSLog(@"Something went wrong: %@", error);
+        httpErrorResponse(watch, success_key, 400, app_id);
+        return;
+    }
+    if(status_code < 200 || status_code >= 300) {
+        NSLog(@"HTTP error %d", status_code);
+        httpErrorResponse(watch, success_key, status_code, app_id);
+        return;
+    }
+    NSError *json_error = nil;
+    NSLog(@"Raw response: %@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
+    NSDictionary *json_response = [NSJSONSerialization JSONObjectWithData:data options:0 error:&json_error];
+    if(error) {
+        NSLog(@"Invalid JSON: %@", json_error);
+        httpErrorResponse(watch, success_key, 500, app_id);
+        return;
+    }
+    NSMutableDictionary *response_dict = [[NSMutableDictionary alloc] initWithCapacity:[json_response count]];
+    NSLog(@"Parsing received dictionary: %@", json_response);
+    for(NSString* key in json_response) {
+        NSNumber *k = [NSNumber numberWithInteger:[key integerValue]];
+        id value = [json_response objectForKey:key];
+        if([value isKindOfClass:[NSArray class]]) {
+            NSArray* array_value = (NSArray*)value;
+            if([array_value count] != 2 ||
+               ![[array_value objectAtIndex:0] isKindOfClass:[NSString class]]) {
+                NSLog(@"Illegal size specification: %@", array_value);
+                httpErrorResponse(watch, success_key, 500, app_id);
+                return;
+            }
+            NSString *size_specification = [array_value objectAtIndex:0];
+            if([[array_value objectAtIndex:1] isKindOfClass:[NSNumber class]]) {
+                NSInteger number = [[array_value objectAtIndex:1] integerValue];
+                NSNumber *pebble_value;
+                if([size_specification isEqualToString:@"b"]) {
+                    pebble_value = [NSNumber numberWithInt8:number];
+                } else if([size_specification isEqualToString:@"B"]) {
+                    pebble_value = [NSNumber numberWithUint8:number];
+                } else if([size_specification isEqualToString:@"s"]) {
+                    pebble_value = [NSNumber numberWithInt16:number];
+                } else if([size_specification isEqualToString:@"S"]) {
+                    pebble_value = [NSNumber numberWithUint16:number];
+                } else if([size_specification isEqualToString:@"i"]) {
+                    pebble_value = [NSNumber numberWithInt32:number];
+                } else if([size_specification isEqualToString:@"I"]) {
+                    pebble_value = [NSNumber numberWithUint32:number];
+                } else {
+                    NSLog(@"Illegal numeric size string: %@", size_specification);
+                    httpErrorResponse(watch, success_key, 500, app_id);
+                    return;
+                }
+                [response_dict setObject:pebble_value forKey:k];
+            } else if([[array_value objectAtIndex:1] isKindOfClass:[NSString class]]) {
+                if([size_specification isEqualToString:@"d"]) {
+                    NSData* pebble_value = [NSData dataFromBase64String:[array_value objectAtIndex:1]];
+                    if(pebble_value != nil) {
+                        [response_dict setObject:pebble_value forKey:k];
+                    } else {
+                        NSLog(@"Failed to decode base64 string.");
+                        httpErrorResponse(watch, success_key, 500, app_id);
+                        return;
+                    }
+                } else {
+                    NSLog(@"Illegal string data type specification: %@", size_specification);
+                }
+            }
+        } else if([value isKindOfClass:[NSString class]]) {
+            [response_dict setObject:value forKey:k];
+        } else if([value isKindOfClass:[NSNumber class]]) {
+            [response_dict setObject:[NSNumber numberWithInt32:[value integerValue]] forKey:k];
+        }
+    }
+    [response_dict setObject:[NSNumber numberWithUint8:YES] forKey:success_key];
+    [response_dict setObject:[NSNumber numberWithUint16:status_code] forKey:HTTP_STATUS_KEY];
+    [response_dict setObject:app_id forKey:HTTP_APP_ID_KEY];
+    [response_dict setObject:cookie forKey:HTTP_COOKIE_KEY];
+    NSLog(@"Pushing dictionary to watch: %@", response_dict);
+    [watch appMessagesPushUpdate:response_dict onSent:^(PBWatch *watch, NSDictionary *update, NSError *error) {
+        if(error) {
+            NSLog(@"Response send failed: %@", error);
+        }
+    }];
+}
+
+- (BOOL)handleWatch:(PBWatch *)watch HTTPRequestFromMessage:(NSDictionary *)message {
+    NSURL* url = [NSURL URLWithString:[message objectForKey:HTTP_URL_KEY]];
+    // Now we have an app ID, too.
+    NSNumber* app_id = [message objectForKey:HTTP_APP_ID_KEY];
+    NSNumber* success_key = HTTP_URL_KEY;
+    // We're using the deprecated protocol if this is unset.
+    if(!app_id) {
+        app_id = @(0);
+        success_key = HTTP_SUCCESS_KEY_DEPRECATED;
+        NSLog(@"Using deprecated protocol.");
+    }
+    
+    NSLog(@"Asked to request the contents of %@", url);
+    NSMutableDictionary *request_dict = [[NSMutableDictionary alloc] initWithCapacity:[message count]];
+    for (NSNumber* key in message) {
+        NSUInteger uint_key = [key unsignedIntegerValue];
+        if(uint_key >= 0xF000 && uint_key <= 0xFFFF) {
+            continue;
+        }
+        [request_dict setValue:[message objectForKey:key] forKey:[key stringValue]];
+    }
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:30.0];
+    NSData *json = [NSJSONSerialization dataWithJSONObject:request_dict options:0 error:nil];
+    [request setHTTPMethod:@"POST"];
+    [request setHTTPBody:json];
+    [request setValue:[watch serialNumber] forHTTPHeaderField:@"X-Pebble-ID"];
+    [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+    NSCachedURLResponse *cached = [[NSURLCache sharedURLCache] cachedResponseForRequest:request];
+    if(cached) {
+        NSLog(@"Got cached response");
+        if([[cached userInfo][@"expires"] timeIntervalSinceNow] < 0) {
+            NSLog(@"...but it's stale.");
+            [[NSURLCache sharedURLCache] removeCachedResponseForRequest:request];
+        } else {
+            NSLog(@"... and we can use it!");
+            [self handleHTTPResponse:[cached response] data:[cached data] error:nil forWatch:watch message:message sk:success_key];
+            return YES;
+        }
+    }
+    NSLog(@"Made request with data: %@", request_dict);
+    [NSURLConnection sendAsynchronousRequest:request
+                                       queue:[NSOperationQueue currentQueue]
+                           completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
+                               [self handleHTTPResponse:response data:data error:error forWatch:watch message:message sk:success_key];
+                               NSDictionary *headers = [(NSHTTPURLResponse*)response allHeaderFields];
+                               NSString *cache_control = headers[@"Cache-Control"];
+                               if(cache_control) {
+                                   NSArray *parts = [cache_control componentsSeparatedByString:@";"];
+                                   for(NSString *part in parts) {
+                                       NSArray *kv = [cache_control componentsSeparatedByString:@"="];
+                                       if([[kv[0] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] isEqualToString:@"max-age"]) {
+                                           NSInteger maxAge = [[kv[1] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] integerValue];
+                                           if(maxAge > 0) {
+                                               NSDate* expires = [NSDate dateWithTimeIntervalSinceNow:maxAge];
+                                               NSCachedURLResponse *new_cache = [[NSCachedURLResponse alloc] initWithResponse:response data:data userInfo:@{@"expires": expires} storagePolicy:NSURLCacheStorageAllowed];
+                                               NSLog(@"Expires in %d at %@", maxAge, expires);
+                                               [[NSURLCache sharedURLCache] storeCachedResponse:new_cache forRequest:request];
+                                               return;
+                                           }
+                                       }
+                                   }
+                                   NSLog(@"Cached.");
+                               }
+                           }
+     ];
+    return YES;
+}
+
+- (KBPebbleValue*)getStoredValueForApp:(NSNumber *)appID withKey:(NSNumber *)key {
+    NSFetchRequest *request = [[NSFetchRequest alloc] init];
+    [request setEntity:[NSEntityDescription entityForName:@"KBPebbleValue" inManagedObjectContext:managedObjectContext]];
+    [request setPredicate:[NSPredicate predicateWithFormat:@"app_id = %@ AND key = %@", appID, key, nil]];
+    NSError* error;
+    KBPebbleValue *v = [[managedObjectContext executeFetchRequest:request error:&error] lastObject];
+    if(error) {
+        return nil;
+    }
+    return v;
+}
+
+- (void)storeId:(id)value InPebbleValue:(KBPebbleValue*)pv {
+    if([value isKindOfClass:[NSNumber class]]) {
+        NSNumber* num = value;
+        uint8_t* data = alloca([num width] + 1);
+        data[0] = [num isSigned];
+        [num getValue:&data[1]];
+        pv.value = [NSData dataWithBytes:data length:[num width]+1];
+        pv.kind = KB_PEBBLE_VALUE_NUMBER;
+    } else if([value isKindOfClass:[NSString class]]) {
+        NSString* str = value;
+        pv.value = [str dataUsingEncoding:NSUTF8StringEncoding];
+        pv.kind = KB_PEBBLE_VALUE_STRING;
+    } else if([value isKindOfClass:[NSData class]]) {
+        pv.value = value;
+        pv.kind = KB_PEBBLE_VALUE_DATA;
+    }
+}
+
+- (id)getIdFromPebbleValue:(KBPebbleValue*)pv {
+    if([pv.kind isEqualToNumber:KB_PEBBLE_VALUE_DATA]) {
+        return pv.value;
+    } else if([pv.kind isEqualToNumber:KB_PEBBLE_VALUE_STRING]) {
+        return [[NSString alloc] initWithData:pv.value encoding:NSUTF8StringEncoding];
+    } else if([pv.kind isEqualToNumber:KB_PEBBLE_VALUE_NUMBER]) {
+        // Well this is tedious.
+        const uint8_t *bytes = pv.value.bytes;
+        BOOL is_signed = (BOOL)bytes[0];
+        if(is_signed) {
+            switch (pv.value.length) {
+                case 2:
+                    return [NSNumber numberWithInt8:bytes[1]];
+                case 3:
+                    return [NSNumber numberWithInt16:(bytes[2]) << 8 | (bytes[1])];
+                case 5:
+                    return [NSNumber numberWithInt32:(bytes[4] << 24) | (bytes[3] << 16) | (bytes[2]) << 8 | (bytes[1])];
+            }
+        } else {
+            switch (pv.value.length) {
+                case 2:
+                    return [NSNumber numberWithUint8:bytes[1]];
+                case 3:
+                    return [NSNumber numberWithUint16:(bytes[2]) << 8 | (bytes[1])];
+                case 5:
+                    return [NSNumber numberWithUint32:(bytes[4] << 24) | (bytes[3] << 16) | (bytes[2]) << 8 | (bytes[1])];
+            }
+        }
+    }
+    return nil;
+}
+
+- (BOOL)handleWatch:(PBWatch *)watch storeKeyFromMessage:(NSDictionary *)message {
+    KBPebbleValue *v;
+    NSNumber *appID = message[HTTP_APP_ID_KEY];
+    NSNumber *cookie = message[HTTP_COOKIE_STORE_KEY];
+    NSMutableDictionary *dict = [message mutableCopy];
+    [dict removeObjectForKey:HTTP_APP_ID_KEY];
+    [dict removeObjectForKey:HTTP_COOKIE_STORE_KEY];
+    for(NSNumber *key in dict) {
+        v = [self getStoredValueForApp:appID withKey:key];
+        if(!v) {
+            v = (KBPebbleValue*)[NSEntityDescription insertNewObjectForEntityForName:@"KBPebbleValue" inManagedObjectContext:managedObjectContext];
+            v.app_id = appID;
+            v.key = key;
+        }
+        [self storeId:message[key] InPebbleValue:v];
+        NSLog(@"Set %@ = %@", key, v.value);
+    }
+    // Confirm success
+    [watch appMessagesPushUpdate:@{HTTP_COOKIE_STORE_KEY: cookie, HTTP_APP_ID_KEY: appID} onSent:nil];
+    [self saveKeyValueData];
+    return YES;
+}
+
+- (BOOL)handleWatch:(PBWatch *)watch getKeyFromMessage:(NSDictionary *)message {
+    NSNumber *appID = message[HTTP_APP_ID_KEY];
+    NSNumber *cookie = message[HTTP_COOKIE_LOAD_KEY];
+    NSMutableDictionary *response = [[NSMutableDictionary alloc] init];
+    for(NSNumber *key in message) {
+        if([key isEqualToNumber:HTTP_APP_ID_KEY] || [key isEqualToNumber:HTTP_COOKIE_LOAD_KEY]) {
+            continue;
+        }
+        KBPebbleValue *v = [self getStoredValueForApp:appID withKey:key];
+        if(v) {
+            response[key] = [self getIdFromPebbleValue:v];
+            NSLog(@"Got %@ = %@", key, response[key]);
+        } else {
+            NSLog(@"Failed to find a value for %@.", key);
+        }
+    }
+    response[HTTP_COOKIE_LOAD_KEY] = cookie;
+    response[HTTP_APP_ID_KEY] = appID;
+    [watch appMessagesPushUpdate:response onSent:nil];
+    return YES;
+}
+
+- (BOOL)handleWatch:(PBWatch *)watch saveFromMessage:(NSDictionary *)message {
+    NSError *error;
+    [managedObjectContext save:&error];
+    BOOL success = YES;
+    if(error) {
+        NSLog(@"Save failed: %@", error);
+        success = NO;
+    }
+    [watch appMessagesPushUpdate:@{HTTP_COOKIE_FSYNC_KEY: [NSNumber numberWithUint8:success], HTTP_APP_ID_KEY: message[HTTP_APP_ID_KEY]} onSent:nil];
+    return YES;
+}
+
+- (BOOL)handleWatch:(PBWatch *)watch deleteFromMessage:(NSDictionary *)message {
+    NSNumber *appID = message[HTTP_APP_ID_KEY];
+    NSNumber *cookie = message[HTTP_COOKIE_DELETE_KEY];
+    for(NSNumber *key in message) {
+        if([key isEqualToNumber:HTTP_APP_ID_KEY] || [key isEqualToNumber:HTTP_COOKIE_DELETE_KEY]) {
+            continue;
+        }
+        KBPebbleValue *v = [self getStoredValueForApp:appID withKey:key];
+        if(v) {
+            NSLog(@"Deleting object %@ for %@", key, appID);
+            [managedObjectContext deleteObject:v];
+        }
+    }
+    [watch appMessagesPushUpdate:@{HTTP_COOKIE_DELETE_KEY: cookie, HTTP_APP_ID_KEY: appID} onSent:nil];
+    [self saveKeyValueData];
+    return YES;
+}
+
+- (BOOL)handleWatch:(PBWatch *)watch timeFromMessage:(NSDictionary *)message {
+    NSMutableDictionary *response = [message mutableCopy];
+    NSTimeZone* tz = [NSTimeZone systemTimeZone];
+    response[HTTP_UTC_OFFSET_KEY] = [NSNumber numberWithInt32:[tz secondsFromGMT]];
+    response[HTTP_IS_DST_KEY] = [NSNumber numberWithUint8:[tz isDaylightSavingTime]];
+    response[HTTP_TZ_NAME_KEY] = [tz name];
+    response[HTTP_TIME_KEY] = [NSNumber numberWithUint32:time(nil)];
+    NSLog(@"Sending tz data: %@", response);
+    [watch appMessagesPushUpdate:response onSent:nil];
+    return YES;
+}
+
+-(BOOL)handleWatch:(PBWatch *)watch locationFromMessage:(NSDictionary *)message {
+    hasPendingLocationRequest = YES;
+    [locationManager startUpdatingLocation];
+    return YES;
+}
+
 
 @end

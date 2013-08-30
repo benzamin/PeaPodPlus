@@ -32,6 +32,11 @@
 		4B1F7E3317BE1BAC00087861 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B1F7E3217BE1BAC00087861 /* AudioToolbox.framework */; };
 		4B5CA87017C80450002623B7 /* EventKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B5CA86F17C80450002623B7 /* EventKit.framework */; };
 		4B5CA87217C80902002623B7 /* EventKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B5CA87117C80902002623B7 /* EventKitUI.framework */; };
+		4BB17F7517CFD1C10022655C /* KBPebbleValue.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BB17F7217CFD1C10022655C /* KBPebbleValue.m */; };
+		4BB17F7617CFD1C10022655C /* NSData+Base64.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BB17F7417CFD1C10022655C /* NSData+Base64.m */; };
+		4BB17F7817CFD1FC0022655C /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB17F7717CFD1FC0022655C /* CoreLocation.framework */; };
+		4BB17F7A17CFD2110022655C /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB17F7917CFD2110022655C /* CoreData.framework */; };
+		4BB17F7D17CFE0B60022655C /* PebbleModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 4BB17F7B17CFE0B60022655C /* PebbleModel.xcdatamodeld */; };
 		4BBAC4C717CF55BB00DCCEE7 /* SetingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BBAC4C517CF55BA00DCCEE7 /* SetingsViewController.m */; };
 		4BBAC4C817CF55BB00DCCEE7 /* SetingsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4BBAC4C617CF55BA00DCCEE7 /* SetingsViewController.xib */; };
 		4BF445A517CE4FB700E1A6BF /* NotesListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BF445A317CE4FB700E1A6BF /* NotesListViewController.m */; };
@@ -75,6 +80,13 @@
 		4B1F7E3217BE1BAC00087861 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		4B5CA86F17C80450002623B7 /* EventKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKit.framework; path = System/Library/Frameworks/EventKit.framework; sourceTree = SDKROOT; };
 		4B5CA87117C80902002623B7 /* EventKitUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKitUI.framework; path = System/Library/Frameworks/EventKitUI.framework; sourceTree = SDKROOT; };
+		4BB17F7117CFD1C10022655C /* KBPebbleValue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KBPebbleValue.h; sourceTree = "<group>"; };
+		4BB17F7217CFD1C10022655C /* KBPebbleValue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KBPebbleValue.m; sourceTree = "<group>"; };
+		4BB17F7317CFD1C10022655C /* NSData+Base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Base64.h"; sourceTree = "<group>"; };
+		4BB17F7417CFD1C10022655C /* NSData+Base64.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Base64.m"; sourceTree = "<group>"; };
+		4BB17F7717CFD1FC0022655C /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
+		4BB17F7917CFD2110022655C /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		4BB17F7C17CFE0B60022655C /* PebbleModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = PebbleModel.xcdatamodel; sourceTree = "<group>"; };
 		4BBAC4C417CF55BA00DCCEE7 /* SetingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SetingsViewController.h; sourceTree = "<group>"; };
 		4BBAC4C517CF55BA00DCCEE7 /* SetingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SetingsViewController.m; sourceTree = "<group>"; };
 		4BBAC4C617CF55BA00DCCEE7 /* SetingsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SetingsViewController.xib; sourceTree = "<group>"; };
@@ -91,11 +103,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3328FC301750FA4100C38C1A /* MessageUI.framework in Frameworks */,
+				4BB17F7A17CFD2110022655C /* CoreData.framework in Frameworks */,
+				4BB17F7817CFD1FC0022655C /* CoreLocation.framework in Frameworks */,
 				4B5CA87217C80902002623B7 /* EventKitUI.framework in Frameworks */,
 				4B5CA87017C80450002623B7 /* EventKit.framework in Frameworks */,
 				4B1F7E3317BE1BAC00087861 /* AudioToolbox.framework in Frameworks */,
 				3328FC321750FADD00C38C1A /* MediaPlayer.framework in Frameworks */,
-				3328FC301750FA4100C38C1A /* MessageUI.framework in Frameworks */,
 				3328FC2E1750FA3B00C38C1A /* CoreMotion.framework in Frameworks */,
 				3328FC2C1750FA3500C38C1A /* CoreBluetooth.framework in Frameworks */,
 				3328FC2A1750FA2E00C38C1A /* libz.dylib in Frameworks */,
@@ -114,6 +128,8 @@
 		3328FBF01750F95800C38C1A = {
 			isa = PBXGroup;
 			children = (
+				4BB17F7917CFD2110022655C /* CoreData.framework */,
+				4BB17F7717CFD1FC0022655C /* CoreLocation.framework */,
 				4B5CA87117C80902002623B7 /* EventKitUI.framework */,
 				4B5CA86F17C80450002623B7 /* EventKit.framework */,
 				4B1F7E3217BE1BAC00087861 /* AudioToolbox.framework */,
@@ -153,6 +169,11 @@
 		3328FC021750F95800C38C1A /* pebbleremote */ = {
 			isa = PBXGroup;
 			children = (
+				4BB17F7B17CFE0B60022655C /* PebbleModel.xcdatamodeld */,
+				4BB17F7117CFD1C10022655C /* KBPebbleValue.h */,
+				4BB17F7217CFD1C10022655C /* KBPebbleValue.m */,
+				4BB17F7317CFD1C10022655C /* NSData+Base64.h */,
+				4BB17F7417CFD1C10022655C /* NSData+Base64.m */,
 				4BF445A217CE4FB700E1A6BF /* NotesListViewController.h */,
 				4BF445A317CE4FB700E1A6BF /* NotesListViewController.m */,
 				4BF445A417CE4FB700E1A6BF /* NotesListViewController.xib */,
@@ -271,6 +292,9 @@
 				4BF445A517CE4FB700E1A6BF /* NotesListViewController.m in Sources */,
 				4BF445AA17CE766800E1A6BF /* NoteDetailsViewController.m in Sources */,
 				4BBAC4C717CF55BB00DCCEE7 /* SetingsViewController.m in Sources */,
+				4BB17F7517CFD1C10022655C /* KBPebbleValue.m in Sources */,
+				4BB17F7617CFD1C10022655C /* NSData+Base64.m in Sources */,
+				4BB17F7D17CFE0B60022655C /* PebbleModel.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -413,6 +437,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		4BB17F7B17CFE0B60022655C /* PebbleModel.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				4BB17F7C17CFE0B60022655C /* PebbleModel.xcdatamodel */,
+			);
+			currentVersion = 4BB17F7C17CFE0B60022655C /* PebbleModel.xcdatamodel */;
+			path = PebbleModel.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 3328FBF11750F95800C38C1A /* Project object */;
 }
