@@ -32,6 +32,7 @@
 {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
+    [self setTitle:@"Settings"];
      self.silderValue = [[[NSUserDefaults standardUserDefaults] objectForKey:CAPTURE_DELAY_KEY] floatValue];
     [[self sldrCaptureValue] setValue:self.silderValue animated:YES];
     self.lblCaptureValue.text = [NSString stringWithFormat:@"%.1f Sec", self.sldrCaptureValue.value ];
@@ -63,6 +64,11 @@
 -(IBAction)infoButtonPressed:(id)sender
 {
     [[UIApplication sharedApplication] openURL:[NSURL URLWithString: @"http://iphonedevwiki.net/index.php/AudioServices"]];
+}
+
+-(IBAction)installWatchAppPressed:(id)sender
+{
+    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"http://www.mypebblefaces.com/apps/5953/5827/"]];
 }
 
 -(BOOL)isSoundIdValid:(NSString *)soundID

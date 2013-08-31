@@ -35,7 +35,7 @@
 				<reference key="NSNextResponder"/>
 				<int key="NSvFlags">274</int>
 				<array class="NSMutableArray" key="NSSubviews">
-					<object class="IBUITextView" id="274606860">
+					<object class="IBUITextView" id="427056387">
 						<reference key="NSNextResponder" ref="191373211"/>
 						<int key="NSvFlags">274</int>
 						<string key="NSFrameSize">{320, 460}</string>
@@ -53,16 +53,16 @@
 						<object class="NSMutableString" key="IBUIText">
 							<bytes key="NS.bytes">UGVhcG9kKwoKRW5oYW5jZWQgZnVuY3Rpb25hbGl0eSBieSBCZW56YW1pbiBCYXNoZXIKaHR0cHM6Ly90
 d2l0dGVyLmNvbS9iZW56YW1pbjE5ODUgCgpPcmlnaW5hbCBQZWFwb2QvcGViYmxlcmVtb3RlIHdhcyBm
-b3JrZWQgd2l0aCBsb3ZlIGZyb20gS2F0aGFyaW5lJ3MgaHR0cHM6Ly9naXRodWIuY29tL0thdGhhcmlu
-ZS9wZWFwb2QgLgpCaWcgdGhhbmtzIHRvIGh0dHBzOi8vY2xvdWRwZWJibGUubmV0IHRoZSB3YXRjaCBh
-cHAgd2FzIGNyZWF0ZWQgdXNpbmcgdGhpcyBiZWF1dGlmdWwgb25saW5lIElERSBieSBLYXRoYXJpbmUu
-IApXYXRjaEFwcCBhbmQgaU9TIGFwcCB3YXMgd3JpdHRlbiB3aXRoIHRoZSBoZWxwIG9mIHRoZSBjb2Rl
-IGJhc2VzIGJ54oCmCkNhbGVuZGFyIFdhdGNoYXBwIGNvZGUgdXNlZDogaHR0cHM6Ly9naXRodWIuY29t
-L0pubWF0dGVybi9wZWJibGUtY2FsCkNhbGVuZGFyIGlPUyBhcHAgY29kZSB1c2VkOiBodHRwczovL2dp
-dGh1Yi5jb20vSmF2aVNvdG8vSlNQZWJibGVSZW1pbmRlcnMKClNvdXJjZSBDb2RlIGNhbiBiZSBmb3Vu
-ZCBmb3IgdGhpcyBhcHAgaGVyZTogaHR0cHM6Ly9naXRodWIuY29tL2JlbnphbWluL3BlYXBvZC8KWW91
-IGNhbiBmb3JrIG9yIGNoYW5nZSBvciB1c2UgdGhlIHNvdXJjZSBhbnl0aW1lLCBidXQgV0lUSE9VVCBh
-bnkgYnVzaW5lc3MgcHVycG9zZS4</bytes>
+b3JrZWQgd2l0aCBsb3ZlIGZyb20gS2F0aGFyaW5lJ3M6IGh0dHBzOi8vZ2l0aHViLmNvbS9LYXRoYXJp
+bmUvcGVhcG9kCkJpZyB0aGFua3MgdG8gaHR0cHM6Ly9jbG91ZHBlYmJsZS5uZXQgdGhlIHdhdGNoIGFw
+cCB3YXMgY3JlYXRlZCB1c2luZyB0aGlzIGJlYXV0aWZ1bCBvbmxpbmUgSURFIGJ5IEthdGhhcmluZS4g
+CldhdGNoQXBwIGFuZCBpT1MgYXBwIHdhcyB3cml0dGVuIHdpdGggdGhlIGhlbHAgb2YgdGhlIGNvZGUg
+YmFzZXMgYnkga2F0aGFyaW5lcyBQZWFwb2QsIGh0dHBlYmJsZSwKQ2FsZW5kYXIgV2F0Y2hhcHAgY29k
+ZSB1c2VkOiBodHRwczovL2dpdGh1Yi5jb20vSm5tYXR0ZXJuL3BlYmJsZS1jYWwKQ2FsZW5kYXIgaU9T
+IGFwcCBjb2RlIHVzZWQ6IGh0dHBzOi8vZ2l0aHViLmNvbS9KYXZpU290by9KU1BlYmJsZVJlbWluZGVy
+cwoKU291cmNlIENvZGUgY2FuIGJlIGZvdW5kIGZvciB0aGlzIGFwcCBoZXJlOiBodHRwczovL2dpdGh1
+Yi5jb20vYmVuemFtaW4vcGVhcG9kLwpZb3UgY2FuIGZvcmsgb3IgY2hhbmdlIG9yIHVzZSB0aGUgc291
+cmNlIGFueXRpbWUsIGJ1dCBXSVRIT1VUIGFueSBidXNpbmVzcyBwdXJwb3NlLg</bytes>
 						</object>
 						<int key="IBUITextAlignment">1</int>
 						<object class="IBUITextInputTraits" key="IBUITextInputTraits">
@@ -84,7 +84,7 @@ bnkgYnVzaW5lc3MgcHVycG9zZS4</bytes>
 				<string key="NSFrame">{{0, 20}, {320, 460}}</string>
 				<reference key="NSSuperview"/>
 				<reference key="NSWindow"/>
-				<reference key="NSNextKeyView" ref="274606860"/>
+				<reference key="NSNextKeyView" ref="427056387"/>
 				<object class="NSColor" key="IBUIBackgroundColor">
 					<int key="NSColorSpace">3</int>
 					<bytes key="NSWhite">MQA</bytes>
@@ -136,7 +136,7 @@ bnkgYnVzaW5lc3MgcHVycG9zZS4</bytes>
 						<int key="objectID">1</int>
 						<reference key="object" ref="191373211"/>
 						<array class="NSMutableArray" key="children">
-							<reference ref="274606860"/>
+							<reference ref="427056387"/>
 						</array>
 						<reference key="parent" ref="0"/>
 					</object>
@@ -153,7 +153,7 @@ bnkgYnVzaW5lc3MgcHVycG9zZS4</bytes>
 					</object>
 					<object class="IBObjectRecord">
 						<int key="objectID">4</int>
-						<reference key="object" ref="274606860"/>
+						<reference key="object" ref="427056387"/>
 						<array class="NSMutableArray" key="children"/>
 						<reference key="parent" ref="191373211"/>
 					</object>
@@ -171,7 +171,7 @@ bnkgYnVzaW5lc3MgcHVycG9zZS4</bytes>
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">11</int>
+			<int key="maxID">12</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">

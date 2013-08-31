@@ -282,10 +282,7 @@ typedef enum {
         switch(state) {
             case 0:
             {
-                if([[NSUserDefaults standardUserDefaults] boolForKey:SOUND_ENABLED_KEY])
-                {
-                    AudioServicesPlayAlertSound([[[NSUserDefaults standardUserDefaults] objectForKey:AUDIO_TYPE_PING_KEY] intValue]);
-                }
+                AudioServicesPlayAlertSound([[[NSUserDefaults standardUserDefaults] objectForKey:AUDIO_TYPE_PING_KEY] intValue]);
                 [message_queue enqueue:@{FIND_PHONE_PLAY_SOUND_KEY: [NSNumber numberWithUint8:255]}];
                 break;
             }
