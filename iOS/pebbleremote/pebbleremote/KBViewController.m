@@ -13,14 +13,18 @@
 
 
 @interface KBViewController () {
-    KBiPodRemote *remote;
+    
+    
 }
+
+
 @property (nonatomic) UIImagePickerController *imagePickerController;
 
 @end
 
 @implementation KBViewController
 
+@synthesize remote;
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -30,24 +34,115 @@
     {
         NSMutableArray *arr = [[NSMutableArray alloc] init];
         [arr addObject:[NSString stringWithFormat:@"Pebble Note 1#^#1This is a test Note for shwoing in Pebble!"]];
-        [arr addObject:[NSString stringWithFormat:@"Pebble Note 2#^#2This is a test Note for shwoing in Pebble!"]];
-        [arr addObject:[NSString stringWithFormat:@"Pebble Note 3#^#3This is a test Note for shwoing in Pebble!"]];
         [[NSUserDefaults standardUserDefaults] setObject:arr forKey:NOTE_KEY];
         [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithFloat:0.0] forKey:CAPTURE_DELAY_KEY];
         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:SOUND_ENABLED_KEY];
         [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d", ConnectSystemSoundIDNNewsFlash] forKey:AUDIO_TYPE_CONNECT_KEY];
         [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d", DisconnectSystemSoundIDNoir] forKey:AUDIO_TYPE_DISCONNECT_KEY];
         [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%d", PingSystemSoundIDUpdate] forKey:AUDIO_TYPE_PING_KEY];
-        
-        
+        [[NSUserDefaults standardUserDefaults] setBool:NO forKey:APP_IS_HTTPEBBLE_MODE_KEY];
+         [[NSUserDefaults standardUserDefaults] setBool:YES forKey:SHOULD_BE_CONNECTED_KEY];
         
         [[NSUserDefaults standardUserDefaults] synchronize];
     }
+    isReconnect = NO;
     
+    //setup the UI
+    UIImage *buttonImage = [[UIImage imageNamed:@"whiteButton.png"]
+                            resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
+    UIImage *buttonImageHighlight = [[UIImage imageNamed:@"whiteButtonHighlight.png"]
+                                     resizableImageWithCapInsets:UIEdgeInsetsMake(18, 18, 18, 18)];
+    [connectButton setBackgroundImage:buttonImage forState:UIControlStateNormal];
+    [connectButton setBackgroundImage:buttonImageHighlight forState:UIControlStateHighlighted];
+    shouldBeConnected = [[NSUserDefaults standardUserDefaults] boolForKey:SHOULD_BE_CONNECTED_KEY];
+    couldConnect = NO;
+    [connectButton setHidden:YES];
+    [connectedLabel setText:@"No Pebble available."];
     
-	// Do any additional setup after loading the view, typically from a nib.
-    remote = [[KBiPodRemote alloc] initWithViewControllerReference:self];
+    BOOL isHttpeblleMode = [[NSUserDefaults standardUserDefaults] boolForKey:APP_IS_HTTPEBBLE_MODE_KEY];
+    pepodImage.hidden = isHttpeblleMode;
+    [appModeSwitch setOn:isHttpeblleMode];    
     
+}
+
+
+#pragma mark
+#pragma mark UI handlers
+
+- (void)pebbleFound:(PBWatch *)watch {
+    [connectedLabel setText:[NSString stringWithFormat:@"%@ is available.", [watch name], nil]];
+    [connectButton setTitle:@"Connect" forState:UIControlStateNormal];
+    [connectButton setHidden:NO];
+    couldConnect = YES;
+    [self handleConnection];
+}
+
+- (void)pebbleConnected:(PBWatch *)watch {
+    [connectedLabel setText:[NSString stringWithFormat:@"Connected to %@", [watch name], nil]];
+    [connectButton setTitle:@"Disconnect" forState:UIControlStateNormal];
+    [connectButton setHidden:NO];
+    isConnected = YES;
+}
+
+- (void)pebbleDisconnected:(PBWatch *)watch {
+    [connectedLabel setText:@"Disconnected"];
+    [connectButton setTitle:@"Connect" forState:UIControlStateNormal];
+    [connectButton setHidden:NO];
+    isConnected = NO;
+    if(isReconnect)
+    {
+        [self performSelector:@selector(reconnect) withObject:nil afterDelay:3];
+    }
+}
+
+-(void)reconnect
+{
+    shouldBeConnected = !shouldBeConnected;
+    [self handleConnection];
+    isReconnect = NO;
+}
+
+
+- (void)pebbleLost:(PBWatch *)watch {
+    [connectButton setHidden:YES];
+    [connectedLabel setText:@"No Pebble available."];
+}
+
+- (void)toggleConnected:(id)sender {
+    shouldBeConnected = !shouldBeConnected;
+    [[NSUserDefaults standardUserDefaults] setBool:shouldBeConnected forKey:SHOULD_BE_CONNECTED_KEY];
+    [self handleConnection];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+-(IBAction)switchAppMode:(UISwitch*)sender
+{
+    //if not connected just connect, if connected then reconnect
+    isReconnect = isConnected;
+    shouldBeConnected = !shouldBeConnected;
+    [self handleConnection];
+    
+    BOOL isHttpeblleMode = [[NSUserDefaults standardUserDefaults] boolForKey:APP_IS_HTTPEBBLE_MODE_KEY];
+    pepodImage.hidden = !isHttpeblleMode;
+    [[NSUserDefaults standardUserDefaults] setBool:!isHttpeblleMode forKey:APP_IS_HTTPEBBLE_MODE_KEY];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+- (void)handleConnection
+{
+    if(!isConnected) {
+        if(shouldBeConnected && couldConnect) {
+            [connectedLabel setText:@"Connecting…"];
+            [connectButton setHidden:YES];
+            [self.remote connect];
+        }
+    } else {
+        if(!shouldBeConnected) {
+            [connectedLabel setText:@"Disconnecting…"];
+            [connectButton setHidden:YES];
+            [self.remote disconnect];
+        }
+    }
 }
 
 -(IBAction)showNotesView:(id)sender

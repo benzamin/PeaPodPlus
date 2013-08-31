@@ -48,26 +48,17 @@
 #define HTTP_ALTITUDE_KEY @(0xFFE3)
 
 
-@class KBiPodRemote;
-
-@protocol KBPebbleRemoteDelegate <NSObject>
-
-- (void)pebbleThing:(KBiPodRemote*)thing connected:(PBWatch *)watch;
-- (void)pebbleThing:(KBiPodRemote*)thing disconnected:(PBWatch *)watch;
-- (void)pebbleThing:(KBiPodRemote*)thing found:(PBWatch*)watch;
-- (void)pebbleThing:(KBiPodRemote*)thing lost:(PBWatch *)watch;
-
-@end
 
 @interface KBiPodRemote : NSObject<PBPebbleCentralDelegate, CLLocationManagerDelegate>
 {
 }
 -(void)checkEventStoreAccessForCalendar:(BOOL)push;
 - (id)initWithViewControllerReference:(KBViewController*)vc;
+-(void)connect;
+-(void)disconnect;
+
 @property (nonatomic, strong) KBPebbleMessageQueue *message_queue;
 
 //httpebble
-@property (nonatomic, assign) id<KBPebbleRemoteDelegate> delegate;
-- (id)initWithDelegate:(id<KBPebbleRemoteDelegate>)delegate;
 - (void)saveKeyValueData;
 @end

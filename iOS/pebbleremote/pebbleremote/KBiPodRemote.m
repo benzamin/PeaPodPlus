@@ -109,7 +109,7 @@ typedef enum {
         eventAndReminderCount = 0;
         self.eventsAndRemindersDict = [[NSMutableDictionary alloc] init];
         [[PBPebbleCentral defaultCentral] setDelegate:self];
-        [self setWatch:[[PBPebbleCentral defaultCentral] lastConnectedWatch]];
+        //[self setWatch:[[PBPebbleCentral defaultCentral] lastConnectedWatch]];
         music_player = [MPMusicPlayerController iPodMusicPlayer];
         //[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(musicItemChanged:) name:MPMusicPlayerControllerNowPlayingItemDidChangeNotification object:music_player];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(musicStateChanged:) name:MPMusicPlayerControllerPlaybackStateDidChangeNotification object:music_player];
@@ -147,11 +147,21 @@ typedef enum {
         managedObjectContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSMainQueueConcurrencyType];
         [managedObjectContext setPersistentStoreCoordinator:persistentStoreCoordinator];
 
-        
-        
+        [self performSelector:@selector(initatepebbleremote) withObject:nil afterDelay:1];
+
         
     }
     return self;
+}
+
+
+
+
+
+
+-(void)initatepebbleremote
+{
+    [self setWatch:[[PBPebbleCentral defaultCentral] lastConnectedWatch]];
 }
 
 - (void)musicItemChanged:(MPMediaItem *)item {
@@ -237,8 +247,11 @@ typedef enum {
     {
         AudioServicesPlayAlertSound([[[NSUserDefaults standardUserDefaults] objectForKey:AUDIO_TYPE_DISCONNECT_KEY] intValue]);
     }
+    [kbVC pebbleLost:our_watch];
     NSLog(@"Watch disconnected %@",[watch name]);
 }
+
+
 
 - (void)setWatch:(PBWatch *)watch {
     NSLog(@"Have a watch.");
@@ -254,17 +267,23 @@ typedef enum {
     our_watch = watch;
     message_queue.watch = watch;
     
-    [self connect];//TODO: call it from original viewcontroller
+    [kbVC pebbleFound:watch];
 
 }
 - (void)connect {
+
     [our_watch appMessagesGetIsSupported:^(PBWatch *watch, BOOL isAppMessagesSupported) {
         NSLog(@"Useful watch %@ connected.", [our_watch name]);
         // Send a message to make sure it's awake and that we have a session.
-        uint8_t uuid[] = IPOD_UUID;
-        [our_watch appMessagesSetUUID:[NSData dataWithBytes:uuid length:16]];
-        //[watch appMessagesPushUpdate:@{IPOD_RECONNECT_KEY: @(1)} onSent:nil];// may be not needed for Peapod
-        [our_watch appMessagesPushUpdate:@{HTTP_CONNECT_KEY: [NSNumber numberWithUint8:YES]} onSent:^(PBWatch *watch, NSDictionary *update, NSError *error) {
+
+        uint8_t ipod_uuid[] = IPOD_UUID;
+        uint8_t http_uuid[] = HTTP_UUID;
+        BOOL isHttpebbleMode = [[NSUserDefaults standardUserDefaults] boolForKey:APP_IS_HTTPEBBLE_MODE_KEY];
+        [our_watch appMessagesSetUUID:[NSData dataWithBytes:(isHttpebbleMode ? http_uuid : ipod_uuid) length:16]];
+        if(!isHttpebbleMode)
+            [our_watch appMessagesPushUpdate:@{IPOD_RECONNECT_KEY: @(1)} onSent:nil];
+        else
+            [our_watch appMessagesPushUpdate:@{HTTP_CONNECT_KEY: [NSNumber numberWithUint8:YES]} onSent:^(PBWatch *watch, NSDictionary *update, NSError *error) {
             if(!error) {
                 NSLog(@"Pushed post-reconnect update.");
             } else {
@@ -279,18 +298,18 @@ typedef enum {
     {
         AudioServicesPlayAlertSound([[[NSUserDefaults standardUserDefaults] objectForKey:AUDIO_TYPE_CONNECT_KEY] intValue]);
     }
+    [kbVC pebbleConnected:our_watch];
 
 }
 
 - (void)disconnect {
     if(!our_watch) return;
-    [our_watch closeSession:nil];
+    [our_watch closeSession:^{
+        [kbVC pebbleDisconnected:our_watch];
+    }];
     if(updateHandler) {
         [our_watch appMessagesRemoveUpdateHandler:updateHandler];
         updateHandler = nil;
-    }
-    if(_delegate && [_delegate respondsToSelector:@selector(pebbleThing:disconnected:)]) {
-        [_delegate pebbleThing:self disconnected:our_watch];
     }
     [self setWatch:nil];
 }

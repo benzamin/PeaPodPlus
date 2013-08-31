@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
+@class KBiPodRemote;
 @class KBViewController;
 
 @interface KBAppDelegate : UIResponder <UIApplicationDelegate>
@@ -17,5 +18,7 @@
 @property (strong, nonatomic) KBViewController *viewController;
 
 @property (nonatomic, strong) UINavigationController *navigationController;
+
+@property (nonatomic, strong) KBiPodRemote *remote;
 
 @end

@@ -57,7 +57,7 @@
                 failureCount = 0;
                 //NSLog(@"Successfully pushed: %@", message);
             } else {
-                NSLog(@"Send failed; will retransmit.");
+                NSLog(@"Send failed this message:%@; will retransmit.", message);
                 NSLog(@"Error: %@", error);
                 sleep(1);
                 if(++failureCount > 5) {

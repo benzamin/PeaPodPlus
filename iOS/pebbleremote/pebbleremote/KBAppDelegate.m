@@ -7,12 +7,12 @@
 //
 
 #import "KBAppDelegate.h"
-
 #import "KBViewController.h"
+#import "KBiPodRemote.h"
 
 @implementation KBAppDelegate
 
-@synthesize navigationController;
+@synthesize navigationController, remote;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
@@ -43,15 +43,9 @@
     [window addSubview:[navController view]];
     [window makeKeyAndVisible];
     
+    remote = [[KBiPodRemote alloc] initWithViewControllerReference:kbVC];
+    kbVC.remote = remote;
     
-    
-    
-    
-   /* self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    // Override point for customization after application launch.
-    self.viewController = [[KBViewController alloc] initWithNibName:@"KBViewController" bundle:nil];
-    self.window.rootViewController = self.viewController;
-    [self.window makeKeyAndVisible];*/
     return YES;
 }
 

@@ -32,6 +32,13 @@
 		4B1F7E3317BE1BAC00087861 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B1F7E3217BE1BAC00087861 /* AudioToolbox.framework */; };
 		4B5CA87017C80450002623B7 /* EventKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B5CA86F17C80450002623B7 /* EventKit.framework */; };
 		4B5CA87217C80902002623B7 /* EventKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B5CA87117C80902002623B7 /* EventKitUI.framework */; };
+		4B66ADAA17D1232400138B95 /* cloudpebble.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B66ADA317D1232400138B95 /* cloudpebble.png */; };
+		4B66ADAB17D1232400138B95 /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B66ADA417D1232400138B95 /* icon.png */; };
+		4B66ADAC17D1232400138B95 /* icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B66ADA517D1232400138B95 /* icon@2x.png */; };
+		4B66ADAD17D1232400138B95 /* whiteButton.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B66ADA617D1232400138B95 /* whiteButton.png */; };
+		4B66ADAE17D1232400138B95 /* whiteButton@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B66ADA717D1232400138B95 /* whiteButton@2x.png */; };
+		4B66ADAF17D1232400138B95 /* whiteButtonHighlight.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B66ADA817D1232400138B95 /* whiteButtonHighlight.png */; };
+		4B66ADB017D1232400138B95 /* whiteButtonHighlight@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B66ADA917D1232400138B95 /* whiteButtonHighlight@2x.png */; };
 		4BB17F7517CFD1C10022655C /* KBPebbleValue.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BB17F7217CFD1C10022655C /* KBPebbleValue.m */; };
 		4BB17F7617CFD1C10022655C /* NSData+Base64.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BB17F7417CFD1C10022655C /* NSData+Base64.m */; };
 		4BB17F7817CFD1FC0022655C /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB17F7717CFD1FC0022655C /* CoreLocation.framework */; };
@@ -80,6 +87,13 @@
 		4B1F7E3217BE1BAC00087861 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		4B5CA86F17C80450002623B7 /* EventKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKit.framework; path = System/Library/Frameworks/EventKit.framework; sourceTree = SDKROOT; };
 		4B5CA87117C80902002623B7 /* EventKitUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKitUI.framework; path = System/Library/Frameworks/EventKitUI.framework; sourceTree = SDKROOT; };
+		4B66ADA317D1232400138B95 /* cloudpebble.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cloudpebble.png; sourceTree = "<group>"; };
+		4B66ADA417D1232400138B95 /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.png; sourceTree = "<group>"; };
+		4B66ADA517D1232400138B95 /* icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon@2x.png"; sourceTree = "<group>"; };
+		4B66ADA617D1232400138B95 /* whiteButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = whiteButton.png; sourceTree = "<group>"; };
+		4B66ADA717D1232400138B95 /* whiteButton@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "whiteButton@2x.png"; sourceTree = "<group>"; };
+		4B66ADA817D1232400138B95 /* whiteButtonHighlight.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = whiteButtonHighlight.png; sourceTree = "<group>"; };
+		4B66ADA917D1232400138B95 /* whiteButtonHighlight@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "whiteButtonHighlight@2x.png"; sourceTree = "<group>"; };
 		4BB17F7117CFD1C10022655C /* KBPebbleValue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KBPebbleValue.h; sourceTree = "<group>"; };
 		4BB17F7217CFD1C10022655C /* KBPebbleValue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KBPebbleValue.m; sourceTree = "<group>"; };
 		4BB17F7317CFD1C10022655C /* NSData+Base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Base64.h"; sourceTree = "<group>"; };
@@ -206,6 +220,13 @@
 				3328FC051750F95800C38C1A /* InfoPlist.strings */,
 				3328FC081750F95800C38C1A /* main.m */,
 				3328FC0A1750F95800C38C1A /* pebbleremote-Prefix.pch */,
+				4B66ADA317D1232400138B95 /* cloudpebble.png */,
+				4B66ADA417D1232400138B95 /* icon.png */,
+				4B66ADA517D1232400138B95 /* icon@2x.png */,
+				4B66ADA617D1232400138B95 /* whiteButton.png */,
+				4B66ADA717D1232400138B95 /* whiteButton@2x.png */,
+				4B66ADA817D1232400138B95 /* whiteButtonHighlight.png */,
+				4B66ADA917D1232400138B95 /* whiteButtonHighlight@2x.png */,
 				3328FC0E1750F95800C38C1A /* Default.png */,
 				3328FC101750F95800C38C1A /* Default@2x.png */,
 				3328FC121750F95800C38C1A /* Default-568h@2x.png */,
@@ -273,6 +294,13 @@
 				4BF445A617CE4FB700E1A6BF /* NotesListViewController.xib in Resources */,
 				4BF445AB17CE766800E1A6BF /* NoteDetailsViewController.xib in Resources */,
 				4BBAC4C817CF55BB00DCCEE7 /* SetingsViewController.xib in Resources */,
+				4B66ADAA17D1232400138B95 /* cloudpebble.png in Resources */,
+				4B66ADAB17D1232400138B95 /* icon.png in Resources */,
+				4B66ADAC17D1232400138B95 /* icon@2x.png in Resources */,
+				4B66ADAD17D1232400138B95 /* whiteButton.png in Resources */,
+				4B66ADAE17D1232400138B95 /* whiteButton@2x.png in Resources */,
+				4B66ADAF17D1232400138B95 /* whiteButtonHighlight.png in Resources */,
+				4B66ADB017D1232400138B95 /* whiteButtonHighlight@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
