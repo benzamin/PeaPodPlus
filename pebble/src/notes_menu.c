@@ -45,8 +45,6 @@ static void displayErrorMessage(char *errorMessage)
 {
     text_layer_set_text(&errorTextLayer, errorMessage);
     layer_set_hidden(&errorTextLayer.layer, false);
-
-    vibes_double_pulse();
 }
 
 /* INIT */
@@ -109,7 +107,7 @@ static void messageSentSuccessfullyCallback(DictionaryIterator *sent, void *cont
 
 static void messageSentWithErrorCallback(DictionaryIterator *failed, AppMessageResult reason, void *context)
 {
-    displayErrorMessage("failed to send");
+    displayErrorMessage("Not Connected :(");
 }
 
 static void messageReceivedSuccessfullyCallback(DictionaryIterator *received, void *context)
@@ -136,7 +134,7 @@ static void messageReceivedSuccessfullyCallback(DictionaryIterator *received, vo
 
     if (initialized == 1)
     {
-        displayErrorMessage("Can't load Notes more than once.");
+        displayErrorMessage("Error!");
         return;
     }
 

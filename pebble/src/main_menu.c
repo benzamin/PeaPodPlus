@@ -28,23 +28,15 @@ static SimpleMenuItem main_menu_items[] = {
         .callback = open_peapod_menu,
     },
 	{
-        .title = "Notes/ToDos",
+        .title = "Notes",
         .callback = open_notes_menu,
     },
 	{
         .title = "Calender",
         .callback = open_calender,
     },
-	//{
-    //    .title = "Stopwatch",
-    //    .callback = open_stopwatch,
-    //},
-//	{
-//        .title = "Ping my Phone",
-//        .callback = ping_my_phone,
-//    },
-		{
-        .title = "Find Phone+Battery",
+	{
+        .title = "Volume+Battery",
         .callback = open_battery_status,
     },
 	{
