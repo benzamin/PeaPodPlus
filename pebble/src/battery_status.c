@@ -74,7 +74,7 @@ static void window_load_b(Window* window) {
     
     // Text labels
 	text_layer_init(&Click_to_play_layer, GRect(0, 67, 120 /* width */, 20 /* height */));
-    text_layer_set_text(&Click_to_play_layer, "Press to Ping Phone>");
+    text_layer_set_text(&Click_to_play_layer, "Ping Phone >");
     text_layer_set_text_alignment(&Click_to_play_layer, GTextAlignmentCenter);
     layer_add_child(window_get_root_layer(window), &Click_to_play_layer.layer);
 
@@ -96,7 +96,7 @@ static void window_load_b(Window* window) {
 	text_layer_set_text_alignment(&text_battery_layer, GTextAlignmentCenter);
 	text_layer_set_font(&text_battery_layer,  fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
 	layer_add_child(window_get_root_layer(window), &text_battery_layer.layer);
-	text_layer_set_text(&text_battery_layer, "Loading...");
+	text_layer_set_text(&text_battery_layer, "");
 
 
 	layer_init(&battery_layer, GRect(0, 0, 144, 55));
@@ -205,5 +205,6 @@ static void app_in_received(DictionaryIterator *received, void* context) {
 }
 static void app_out_failed(DictionaryIterator *failed, AppMessageResult reason, void *context)
 {
-	text_layer_set_text(&status_layer, "Can't Find Phone :(");
+	text_layer_set_text(&Click_to_play_layer, "Not Connected :(");
+	layer_set_hidden(&status_layer.layer, true);
 }

@@ -131,9 +131,11 @@ static void app_in_received(DictionaryIterator *received, void* context) {
     Tuple* tuple = dict_find(received, CAMERA_CAPTURE_KEY);
     if(tuple) 
 	{		
+		//layer_set_hidden(&switch_camera_layer.layer, false);
+		//layer_set_hidden(&switch_flash_layer.layer, false);
 		if(tuple->value->data[0] == 255) //error performing a operation
 		{
-			text_layer_set_text(&capture_layer, "Error! Check Phone");
+			text_layer_set_text(&capture_layer, "Open Phone App!");
 		}
 		else if (tuple->value->data[0] == 0)
 		{
@@ -143,7 +145,6 @@ static void app_in_received(DictionaryIterator *received, void* context) {
 		{
 			text_layer_set_text(&switch_flash_layer, "Flash: Off");		
 		}
-		
 		else if (tuple->value->data[0] == 2)
 		{
 			text_layer_set_text(&switch_flash_layer, "Flash: On");		
@@ -174,5 +175,7 @@ static void app_in_received(DictionaryIterator *received, void* context) {
 }
 static void app_out_failed(DictionaryIterator *failed, AppMessageResult reason, void *context)
 {
-		text_layer_set_text(&capture_layer, "Error! Check Phone");
+		text_layer_set_text(&capture_layer, "Not Connected :(");
+		layer_set_hidden(&switch_camera_layer.layer, true);
+		layer_set_hidden(&switch_flash_layer.layer, true);
 }
