@@ -29,9 +29,14 @@
 		3328FC351750FAFE00C38C1A /* KBiPodRemote.m in Sources */ = {isa = PBXBuildFile; fileRef = 3328FC341750FAFE00C38C1A /* KBiPodRemote.m */; };
 		3328FC5017534A5D00C38C1A /* KBPebbleMessageQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 3328FC4F17534A5D00C38C1A /* KBPebbleMessageQueue.m */; };
 		3328FC53175351C300C38C1A /* KBPebbleImage.m in Sources */ = {isa = PBXBuildFile; fileRef = 3328FC52175351C300C38C1A /* KBPebbleImage.m */; };
+		4B1119D617D257AB00C62D59 /* AboutViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B1119D417D257AB00C62D59 /* AboutViewController.m */; };
+		4B1119D717D257AB00C62D59 /* AboutViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4B1119D517D257AB00C62D59 /* AboutViewController.xib */; };
 		4B1F7E3317BE1BAC00087861 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B1F7E3217BE1BAC00087861 /* AudioToolbox.framework */; };
 		4B5CA87017C80450002623B7 /* EventKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B5CA86F17C80450002623B7 /* EventKit.framework */; };
 		4B5CA87217C80902002623B7 /* EventKitUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B5CA87117C80902002623B7 /* EventKitUI.framework */; };
+		4B8FAD7F17D207160081DBBE /* cloudpebble.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B8FAD7C17D207160081DBBE /* cloudpebble.png */; };
+		4B8FAD8017D207160081DBBE /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B8FAD7D17D207160081DBBE /* icon.png */; };
+		4B8FAD8117D207160081DBBE /* icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4B8FAD7E17D207160081DBBE /* icon@2x.png */; };
 		4BBAC4C717CF55BB00DCCEE7 /* SetingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BBAC4C517CF55BA00DCCEE7 /* SetingsViewController.m */; };
 		4BBAC4C817CF55BB00DCCEE7 /* SetingsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4BBAC4C617CF55BA00DCCEE7 /* SetingsViewController.xib */; };
 		4BF445A517CE4FB700E1A6BF /* NotesListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4BF445A317CE4FB700E1A6BF /* NotesListViewController.m */; };
@@ -71,10 +76,16 @@
 		3328FC4F17534A5D00C38C1A /* KBPebbleMessageQueue.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KBPebbleMessageQueue.m; sourceTree = "<group>"; };
 		3328FC51175351C300C38C1A /* KBPebbleImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KBPebbleImage.h; sourceTree = "<group>"; };
 		3328FC52175351C300C38C1A /* KBPebbleImage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KBPebbleImage.m; sourceTree = "<group>"; };
+		4B1119D317D257AB00C62D59 /* AboutViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AboutViewController.h; sourceTree = "<group>"; };
+		4B1119D417D257AB00C62D59 /* AboutViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AboutViewController.m; sourceTree = "<group>"; };
+		4B1119D517D257AB00C62D59 /* AboutViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = AboutViewController.xib; sourceTree = "<group>"; };
 		4B1F7E3017BE1B7300087861 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		4B1F7E3217BE1BAC00087861 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		4B5CA86F17C80450002623B7 /* EventKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKit.framework; path = System/Library/Frameworks/EventKit.framework; sourceTree = SDKROOT; };
 		4B5CA87117C80902002623B7 /* EventKitUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKitUI.framework; path = System/Library/Frameworks/EventKitUI.framework; sourceTree = SDKROOT; };
+		4B8FAD7C17D207160081DBBE /* cloudpebble.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cloudpebble.png; sourceTree = "<group>"; };
+		4B8FAD7D17D207160081DBBE /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.png; sourceTree = "<group>"; };
+		4B8FAD7E17D207160081DBBE /* icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon@2x.png"; sourceTree = "<group>"; };
 		4BBAC4C417CF55BA00DCCEE7 /* SetingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SetingsViewController.h; sourceTree = "<group>"; };
 		4BBAC4C517CF55BA00DCCEE7 /* SetingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SetingsViewController.m; sourceTree = "<group>"; };
 		4BBAC4C617CF55BA00DCCEE7 /* SetingsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SetingsViewController.xib; sourceTree = "<group>"; };
@@ -164,16 +175,19 @@
 				3328FC141750F95800C38C1A /* KBViewController.h */,
 				3328FC151750F95800C38C1A /* KBViewController.m */,
 				3328FC171750F95800C38C1A /* KBViewController.xib */,
+				4B1119D317D257AB00C62D59 /* AboutViewController.h */,
+				4B1119D417D257AB00C62D59 /* AboutViewController.m */,
+				4B1119D517D257AB00C62D59 /* AboutViewController.xib */,
 				4BBAC4C417CF55BA00DCCEE7 /* SetingsViewController.h */,
 				4BBAC4C517CF55BA00DCCEE7 /* SetingsViewController.m */,
 				4BBAC4C617CF55BA00DCCEE7 /* SetingsViewController.xib */,
-				3328FC031750F95800C38C1A /* Supporting Files */,
 				3328FC331750FAFE00C38C1A /* KBiPodRemote.h */,
 				3328FC341750FAFE00C38C1A /* KBiPodRemote.m */,
 				3328FC4E17534A5D00C38C1A /* KBPebbleMessageQueue.h */,
 				3328FC4F17534A5D00C38C1A /* KBPebbleMessageQueue.m */,
 				3328FC51175351C300C38C1A /* KBPebbleImage.h */,
 				3328FC52175351C300C38C1A /* KBPebbleImage.m */,
+				3328FC031750F95800C38C1A /* Supporting Files */,
 			);
 			path = pebbleremote;
 			sourceTree = "<group>";
@@ -181,6 +195,9 @@
 		3328FC031750F95800C38C1A /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				4B8FAD7C17D207160081DBBE /* cloudpebble.png */,
+				4B8FAD7D17D207160081DBBE /* icon.png */,
+				4B8FAD7E17D207160081DBBE /* icon@2x.png */,
 				3328FC041750F95800C38C1A /* pebbleremote-Info.plist */,
 				3328FC051750F95800C38C1A /* InfoPlist.strings */,
 				3328FC081750F95800C38C1A /* main.m */,
@@ -252,6 +269,10 @@
 				4BF445A617CE4FB700E1A6BF /* NotesListViewController.xib in Resources */,
 				4BF445AB17CE766800E1A6BF /* NoteDetailsViewController.xib in Resources */,
 				4BBAC4C817CF55BB00DCCEE7 /* SetingsViewController.xib in Resources */,
+				4B8FAD7F17D207160081DBBE /* cloudpebble.png in Resources */,
+				4B8FAD8017D207160081DBBE /* icon.png in Resources */,
+				4B8FAD8117D207160081DBBE /* icon@2x.png in Resources */,
+				4B1119D717D257AB00C62D59 /* AboutViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -271,6 +292,7 @@
 				4BF445A517CE4FB700E1A6BF /* NotesListViewController.m in Sources */,
 				4BF445AA17CE766800E1A6BF /* NoteDetailsViewController.m in Sources */,
 				4BBAC4C717CF55BB00DCCEE7 /* SetingsViewController.m in Sources */,
+				4B1119D617D257AB00C62D59 /* AboutViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

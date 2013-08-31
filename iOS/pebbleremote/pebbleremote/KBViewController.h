@@ -14,14 +14,35 @@
 #define AUDIO_TYPE_PING_KEY @"AudioTypePingKey"
 #define AUDIO_TYPE_CONNECT_KEY @"AudioTypeConnectKey"
 #define AUDIO_TYPE_DISCONNECT_KEY @"AudioTypeDCKey"
+#define SHOULD_BE_CONNECTED_KEY @"BBShouldBeConnected"
+
 
 #define ConnectSystemSoundIDNNewsFlash    1028
 #define DisconnectSystemSoundIDNoir    1029
 #define PingSystemSoundIDUpdate    1036
 
+@class PBWatch;
+@class KBiPodRemote;
 
 @interface KBViewController : UIViewController <UINavigationControllerDelegate, UIImagePickerControllerDelegate>
+{
+    IBOutlet UILabel* connectedLabel;
+    IBOutlet UIButton* connectButton;
+    IBOutlet UIImageView* pepodImage;
+    IBOutlet UISwitch* appModeSwitch;
+    BOOL shouldBeConnected;
+    BOOL couldConnect;
+    BOOL isConnected;
+    
+}
 
+@property(nonatomic, strong) KBiPodRemote *remote;
+
+- (void)pebbleFound:(PBWatch *)watch ;
+- (void)pebbleConnected:(PBWatch *)watch ;
+- (void)pebbleDisconnected:(PBWatch *)watch ;
+- (void)pebbleLost:(PBWatch *)watch ;
+- (IBAction)toggleConnected:(id)sender;
 -(void)initiateCamera;
 -(void) removeCameraWindow;
 -(void)operateCamera:(NSInteger)operationKey;

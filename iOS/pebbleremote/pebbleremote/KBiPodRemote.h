@@ -24,6 +24,8 @@
 @interface KBiPodRemote : NSObject<PBPebbleCentralDelegate>
 {
 }
+-(void)connect;
+-(void)disconnect;
 -(void)checkEventStoreAccessForCalendar:(BOOL)push;
 - (id)initWithViewControllerReference:(KBViewController*)vc;
 @property (nonatomic, strong) KBPebbleMessageQueue *message_queue;
