@@ -741,7 +741,11 @@ typedef enum {
     }
      //Finally write the response to the watch
      NSArray * keys = [self.eventsAndRemindersDict allKeys];
-     
+     if([keys count] <= 0)
+     {
+         [self sendString:@"No recent calendar events or reminders found! Check for Settings>Mail,Contacts,Calenders>Calenders section to set the Default Calendar" withKey:GET_EVENTS_REMINDERS_KEY];
+         return;
+     }
      // sort it
      NSArray * sorted_keys = [keys sortedArrayUsingSelector:@selector(compare:)];
      
