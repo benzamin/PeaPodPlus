@@ -33,6 +33,7 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
     [self setTitle:@"Settings"];
+    self.navigationController.navigationBar.translucent = NO;
      self.silderValue = [[[NSUserDefaults standardUserDefaults] objectForKey:CAPTURE_DELAY_KEY] floatValue];
     [[self sldrCaptureValue] setValue:self.silderValue animated:YES];
     self.lblCaptureValue.text = [NSString stringWithFormat:@"%.1f Sec", self.sldrCaptureValue.value ];
