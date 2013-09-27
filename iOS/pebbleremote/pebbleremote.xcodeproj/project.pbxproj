@@ -330,7 +330,7 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Bingo Rimer (2RXZV6YNKW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Bingo Rimer (2RXZV6YNKW)";
 				COPY_PHASE_STRIP = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -347,7 +347,8 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "-ObjC";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "A3E133E8-082E-4919-94FE-56D5D200A9F9";
+				PROVISIONING_PROFILE = "DC8DFD48-81DB-478E-B94B-FBD3460D3167";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "DC8DFD48-81DB-478E-B94B-FBD3460D3167";
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -364,7 +365,8 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = Benzamin;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Bingo Rimer (2RXZV6YNKW)";
 				COPY_PHASE_STRIP = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -373,6 +375,8 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				OTHER_LDFLAGS = "-ObjC";
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "DC8DFD48-81DB-478E-B94B-FBD3460D3167";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -381,7 +385,7 @@
 		3328FC1D1750F95800C38C1A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Bingo Rimer (2RXZV6YNKW)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Bingo Rimer (2RXZV6YNKW)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -391,8 +395,9 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "pebbleremote/pebbleremote-Prefix.pch";
 				INFOPLIST_FILE = "pebbleremote/pebbleremote-Info.plist";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "A3E133E8-082E-4919-94FE-56D5D200A9F9";
+				PRODUCT_NAME = PeapodPlus;
+				PROVISIONING_PROFILE = "DC8DFD48-81DB-478E-B94B-FBD3460D3167";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "DC8DFD48-81DB-478E-B94B-FBD3460D3167";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -400,6 +405,8 @@
 		3328FC1E1750F95800C38C1A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = Benzamin;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Bingo Rimer (2RXZV6YNKW)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../../../pebblekit/iOS\"",
@@ -408,7 +415,9 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "pebbleremote/pebbleremote-Prefix.pch";
 				INFOPLIST_FILE = "pebbleremote/pebbleremote-Info.plist";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = PeapodPlus;
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "DC8DFD48-81DB-478E-B94B-FBD3460D3167";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

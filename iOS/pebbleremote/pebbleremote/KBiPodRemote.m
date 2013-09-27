@@ -680,10 +680,13 @@ typedef enum {
              if(push)[self sendString:@"Error getting Calender events and Reminders. Please check Settings>Privacy>Calender and Settings>Privacy>Rreminders to grant Persission. Also check for Settings>Mail,Contacts,Calenders>Calenders section to set the Default Calendar" withKey:GET_EVENTS_REMINDERS_KEY];
              return;
          }
+         NSArray *reminderArray = [NSArray arrayWithObjects: weakSelf.eventStore.defaultCalendarForNewReminders,nil];
          
-         [weakSelf.eventStore fetchRemindersMatchingPredicate:[weakSelf.eventStore predicateForIncompleteRemindersWithDueDateStarting:nil
-                                                            ending:nil
-                                                            calendars:@[[weakSelf.eventStore defaultCalendarForNewReminders]]]
+         NSPredicate *predicate = [weakSelf.eventStore predicateForIncompleteRemindersWithDueDateStarting:nil
+                                                                                                   ending:nil
+                                                                                                calendars:reminderArray];
+         
+         [weakSelf.eventStore fetchRemindersMatchingPredicate:predicate
                                                    completion:^(NSArray *reminders)
           {
               dispatch_async(dispatch_get_main_queue(), ^{
