@@ -9,7 +9,7 @@ static Window batteryWindow;
 static ActionBarLayer action_bar;
 TextLayer Click_to_play_layer;
 
-// Action bar icons
+// Action bar icons declaration
 static HeapBitmap icon_play;
 static HeapBitmap icon_volume_up;
 static HeapBitmap icon_volume_down;
