@@ -1,7 +1,4 @@
 #include "pebble-cal.h"
-#include "pebble_os.h"
-#include "pebble_app.h"
-#include "pebble_fonts.h"
 #include <string.h>
 #include "xprintf.h"
 #include "common.h"
@@ -622,8 +619,8 @@ static void long_clicked_select(ClickRecognizerRef recognizer, void *context)
 	updateMonthText();
 	layer_mark_dirty(&monthLayer);
 }
-void click_config_provider(ClickConfig **config, Window *window) {
-	config[BUTTON_ID_SELECT]->click.handler = (ClickHandler) select_single_click_handler;
+void click_config_provider(ClickConfigProvider *config, Window *window) {
+	/*config[BUTTON_ID_SELECT]->click.handler = (ClickHandler) select_single_click_handler;
 	config[BUTTON_ID_SELECT]->long_click.handler = (ClickHandler) long_clicked_select;
 	
 	config[BUTTON_ID_UP]->click.handler = (ClickHandler) up_single_click_handler;
@@ -632,7 +629,20 @@ void click_config_provider(ClickConfig **config, Window *window) {
 	
 	config[BUTTON_ID_DOWN]->click.handler = (ClickHandler) down_single_click_handler;
 	config[BUTTON_ID_DOWN]->raw.up_handler = (ClickHandler) btn_up_handler;
-	config[BUTTON_ID_DOWN]->click.repeat_interval_ms = 100;
+	config[BUTTON_ID_DOWN]->click.repeat_interval_ms = 100;*/
+	
+	
+  	const uint16_t repeat_interval_ms = 50;
+	window_single_click_subscribe(BUTTON_ID_SELECT, (ClickHandler) select_single_click_handler);
+	window_long_click_subscribe(BUTTON_ID_SELECT, 0, (ClickHandler)long_clicked_select, NULL);
+	
+  	window_single_repeating_click_subscribe(BUTTON_ID_UP, repeat_interval_ms, (ClickHandler) up_single_click_handler);
+	window_raw_click_subscribe(BUTTON_ID_UP, btn_up_handler, NULL, NULL);
+	
+
+  	window_single_repeating_click_subscribe(BUTTON_ID_DOWN, repeat_interval_ms, (ClickHandler) down_single_click_handler);
+	window_raw_click_subscribe(BUTTON_ID_DOWN, btn_up_handler, NULL, NULL);
+	
 }
 
 void handle_tick(AppContextRef ctx, PebbleTickEvent *t) {
@@ -677,9 +687,9 @@ static void window_load(Window* window) {
 	layer_set_update_proc(&monthLayer, &updateMonth);
 	layer_add_child(window_get_root_layer(window), &monthLayer);
 	
-	window_set_click_config_provider(window, (ClickConfigProvider) click_config_provider);
+	window_set_click_config_provider(window, click_config_provider);
 	
-    app_callbacks = (AppMessageCallbacksNode){
+    /*app_callbacks = (AppMessageCallbacksNode){
         .callbacks = {
             .out_sent = messageSentSuccessfullyCallback,
             .out_failed = messageSentWithErrorCallback,
@@ -687,7 +697,17 @@ static void window_load(Window* window) {
             .in_dropped = messageReceivedWithErrorCallback,
         }
     };
-    app_message_register_callbacks(&app_callbacks);
+    app_message_register_callbacks(&app_callbacks);*/
+	
+	app_message_register_inbox_received(messageReceivedSuccessfullyCallback);
+   app_message_register_inbox_dropped(messageReceivedWithErrorCallback);
+   app_message_register_outbox_sent(messageSentSuccessfullyCallback);
+   app_message_register_outbox_failed(messageSentWithErrorCallback);
+
+
+   const uint32_t inbound_size = 128;
+   const uint32_t outbound_size = 256;
+   app_message_open(inbound_size, outbound_size);
     
 	
 }
@@ -700,12 +720,15 @@ static void window_unload(Window* window) {
 /* INIT */
 void pebble_cal_init() {
 	
-	window_init(&cal_window, windowName);
-    window_set_window_handlers(&cal_window, (WindowHandlers){
-        .unload = window_unload,
-        .load = window_load,
-    });
-    window_stack_push(&cal_window, true);
+	  window = window_create();
+	  window_set_background_color(window, GColorWhite);
+	  window_set_fullscreen(window, true);
+	  window_set_window_handlers(window, (WindowHandlers) {
+		.load = window_load,
+		.unload = window_unload
+	  });
+		
+	  window_stack_push(cal_window, true);
 }
 
 static void requestEventsAndReminders()
@@ -714,8 +737,7 @@ static void requestEventsAndReminders()
     ipod_message_out_get(&iter);
     if(!iter) return;
     dict_write_int8(iter, GET_EVENTS_REMINDERS_KEY, 0);
-    app_message_out_send();
-    app_message_out_release();
+    app_message_outbox_send();
     
 }
 
@@ -749,6 +771,6 @@ static void messageReceivedSuccessfullyCallback(DictionaryIterator *received, vo
     }
 }
 
-static void messageReceivedWithErrorCallback(void *context, AppMessageResult reason)
+static void messageReceivedWithErrorCallback(AppMessageResult reason, void *context )
 {
 }

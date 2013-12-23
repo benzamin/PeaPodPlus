@@ -1,6 +1,4 @@
 #include "ipod_state.h"
-#include "pebble_os.h"
-#include "common.h"
 
 static void in_received(DictionaryIterator *received, void *context);
 static void call_callback(bool track_data);
@@ -19,12 +17,11 @@ static char s_title[100];
 
 
 void ipod_state_init() {
-    app_callbacks = (AppMessageCallbacksNode){
-        .callbacks = {
-            .in_received = in_received,
-        }
-    };
-    app_message_register_callbacks(&app_callbacks);
+	app_message_register_inbox_received(in_received);
+
+   const uint32_t inbound_size = 128;
+   const uint32_t outbound_size = 256;
+   app_message_open(inbound_size, outbound_size);
     s_artist[0] = '\0';
     s_album[0] = '\0';
     s_title[0] = '\0';
@@ -39,8 +36,7 @@ void ipod_state_tick() {
             ipod_message_out_get(&iter);
             if(!iter) return;
             dict_write_int8(iter, IPOD_NOW_PLAYING_KEY, 2);
-            app_message_out_send();
-            app_message_out_release();
+            app_message_outbox_send();
         }
     }
 }

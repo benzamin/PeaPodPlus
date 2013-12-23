@@ -4,7 +4,8 @@ static void update_proc(Layer* layer, GContext *context);
 
 void progress_bar_layer_init(ProgressBarLayer* bar, GRect frame) {
     layer_init(&bar->layer, frame);
-    bar->layer.update_proc = update_proc;
+    //bar->layer.update_proc = update_proc;
+	layer_set_update_proc(&bar->layer, update_proc);
     bar->min = 0;
     bar->max = 255;
     bar->value = 0;

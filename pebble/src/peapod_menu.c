@@ -1,7 +1,4 @@
 #include "peapod_menu.h"
-#include "pebble_os.h"
-#include "pebble_app.h"
-#include "pebble_fonts.h"
 #include "common.h"
 #include "library_menus.h"
 #include "now_playing.h"
@@ -56,13 +53,16 @@ static SimpleMenuLayer main_menu_layer;
 
 
 void peapod_menu_init() {
-	
-	window_init(&window, "Peapod");
-    window_set_window_handlers(&window, (WindowHandlers){
-        .unload = window_unload,
-        .load = window_load,
-    });
-    window_stack_push(&window, true);
+		
+	  window = window_create();
+	  window_set_background_color(window, GColorWhite);
+	  window_set_fullscreen(window, true);
+	  window_set_window_handlers(window, (WindowHandlers) {
+		.load = window_load,
+		.unload = window_unload
+	  });
+		
+	  window_stack_push(window, true);
 }
 
 static void window_load(Window* window) {

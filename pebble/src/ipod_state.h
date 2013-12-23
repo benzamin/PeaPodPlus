@@ -1,7 +1,7 @@
 #ifndef ipod_ipod_state_h
 #define ipod_ipod_state_h
 
-#include "pebble_os.h"
+#include <pebble.h>
 #include "common.h"
 
 typedef void(*iPodStateCallback)(bool track_data);

@@ -1,4 +1,4 @@
-#include "pebble_os.h"
+#include <pebble.h>
 #ifndef ipod_peapod_menu_h
 #define ipod_peapod_menu_h
 

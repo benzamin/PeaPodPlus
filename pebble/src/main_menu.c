@@ -1,7 +1,4 @@
 #include "main_menu.h"
-#include "pebble_os.h"
-#include "pebble_app.h"
-#include "pebble_fonts.h"
 #include "common.h"
 #include "library_menus.h"
 #include "ipod.h"

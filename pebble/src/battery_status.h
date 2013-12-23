@@ -1,4 +1,4 @@
-#include "pebble_os.h"
+#include <pebble.h>
 #ifndef ipod_battery_status_h
 #define ipod_battery_status_h
 

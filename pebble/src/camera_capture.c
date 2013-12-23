@@ -1,7 +1,5 @@
 #include "camera_capture.h"
-#include "pebble_os.h"
-#include "pebble_fonts.h"
-#include "pebble_app.h"
+#include <pebble.h>
 #include "common.h"
 
 static Window cameraWindow;
@@ -17,7 +15,7 @@ static HeapBitmap icon_switch_flash;
 
 static AppMessageCallbacksNode app_callbacks;
 
-static void click_config_provider(ClickConfig **config, void *context);
+static void click_config_provider(ClickConfigProvider **config, void *context);
 static void window_unload(Window* window);
 static void window_load(Window* window);
 static void clicked_up(ClickRecognizerRef recognizer, void *context);
@@ -31,13 +29,16 @@ static void app_in_received(DictionaryIterator *received, void *context);
 static void app_out_failed(DictionaryIterator *failed, AppMessageResult reason, void *context);
 
 
-void show_camera_capture(){
-    window_init(&cameraWindow, "Ping My Phone");
-    window_set_window_handlers(&cameraWindow, (WindowHandlers){
-        .unload = window_unload,
-        .load = window_load,
-    });
-    window_stack_push(&cameraWindow, true);
+void show_camera_capture(){	
+	  window = window_create();
+	  window_set_background_color(window, GColorWhite);
+	  window_set_fullscreen(window, true);
+	  window_set_window_handlers(window, (WindowHandlers) {
+		.load = window_load,
+		.unload = window_unload
+	  });
+		
+	  window_stack_push(cameraWindow, true);
 }
 
 static void window_load(Window* window) {
@@ -73,13 +74,13 @@ static void window_load(Window* window) {
     layer_add_child(window_get_root_layer(window), &switch_flash_layer.layer);
 
     
-    app_callbacks = (AppMessageCallbacksNode){
-        .callbacks = {
-            .in_received = app_in_received,
-			.out_failed = app_out_failed,
-        }
-    };
-    app_message_register_callbacks(&app_callbacks);
+	app_message_register_inbox_received(app_in_received);
+   	app_message_register_outbox_failed(app_out_failed);
+
+   const uint32_t inbound_size = 128;
+   const uint32_t outbound_size = 256;
+   app_message_open(inbound_size, outbound_size);
+	
 	send_operate_camera(1);
 }
 
@@ -92,15 +93,22 @@ static void window_unload(Window* window) {
     heap_bitmap_deinit(&icon_catpure);
 	heap_bitmap_deinit(&icon_switch_camera);
     heap_bitmap_deinit(&icon_switch_flash);
+	
+	
+	
 
 }
 
-static void click_config_provider(ClickConfig **config, void* context) {
-    config[BUTTON_ID_DOWN]->click.handler = clicked_down;
-    config[BUTTON_ID_UP]->click.handler = clicked_up;
-    config[BUTTON_ID_SELECT]->click.handler = clicked_select;
-    config[BUTTON_ID_SELECT]->long_click.handler = long_clicked_select;
+static void click_config_provider(ClickConfigProvider *config, void* context) {
+    
+	const uint16_t repeat_interval_ms = 50;
+	window_single_click_subscribe(BUTTON_ID_SELECT, (ClickHandler) clicked_select);
+	window_long_click_subscribe(BUTTON_ID_SELECT, 0, (ClickHandler)long_clicked_select, NULL);
+  	window_single_repeating_click_subscribe(BUTTON_ID_UP, repeat_interval_ms, (ClickHandler) clicked_up);
+  	window_single_repeating_click_subscribe(BUTTON_ID_DOWN, repeat_interval_ms, (ClickHandler) clicked_down);
+	
 }
+
 
 static void clicked_up(ClickRecognizerRef recognizer, void *context) {
 	send_operate_camera(64);
@@ -123,8 +131,7 @@ static void send_operate_camera(int8_t val) {
     ipod_message_out_get(&iter);
     if(!iter) return;
     dict_write_int8(iter, CAMERA_CAPTURE_KEY, val);
-    app_message_out_send();
-    app_message_out_release();
+    app_message_outbox_send();
 }
 
 static void app_in_received(DictionaryIterator *received, void* context) {

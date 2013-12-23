@@ -1,7 +1,4 @@
 #include "now_playing.h"
-#include "pebble_os.h"
-#include "pebble_fonts.h"
-#include "pebble_app.h"
 #include "marquee_text.h"
 #include "ipod_state.h"
 #include "progress_bar.h"
@@ -28,7 +25,7 @@ static HeapBitmap icon_volume_down;
 
 static AppMessageCallbacksNode app_callbacks;
 
-static void click_config_provider(ClickConfig **config, void *context);
+static void click_config_provider(ClickConfigProvider **config, void *context);
 static void window_unload(Window* window);
 static void window_load(Window* window);
 static void clicked_up(ClickRecognizerRef recognizer, void *context);
@@ -45,15 +42,19 @@ static void display_no_album();
 
 static bool controlling_volume = false;
 static bool is_shown = false;
-static AppTimerHandle timer = 0;
+static AppTimer timer;
+//static AppTimerCallback now_playing_animation_tick;
 
 void show_now_playing() {
-    window_init(&window, "Now playing");
-    window_set_window_handlers(&window, (WindowHandlers){
-        .unload = window_unload,
-        .load = window_load,
-    });
-    window_stack_push(&window, true);
+	  window = window_create();
+	  window_set_background_color(window, GColorWhite);
+	  window_set_fullscreen(window, true);
+	  window_set_window_handlers(window, (WindowHandlers) {
+		.load = window_load,
+		.unload = window_unload
+	  });
+		
+	  window_stack_push(window, true);
 }
 
 void now_playing_tick() {
@@ -62,8 +63,10 @@ void now_playing_tick() {
 
 void now_playing_animation_tick() {
     if(!is_shown) return;
-    app_timer_cancel_event(g_app_context, timer);
-    timer = app_timer_send_event(g_app_context, 33, 1);
+    //app_timer_cancel(timer);
+	
+    //timer = app_timer_send_event(g_app_context, 33, 1);
+	//timer = app_timer_register(33, now_playing_animation_tick, NULL);
 }
 
 static void window_load(Window* window) {
@@ -116,12 +119,14 @@ static void window_load(Window* window) {
     layer_add_child(window_get_root_layer(window), &album_art_layer.layer);
     display_no_album();
     
-    app_callbacks = (AppMessageCallbacksNode){
-        .callbacks = {
-            .in_received = app_in_received,
-        }
-    };
-    app_message_register_callbacks(&app_callbacks);
+	app_message_register_inbox_received(app_in_received);
+
+   const uint32_t inbound_size = 128;
+   const uint32_t outbound_size = 256;
+   app_message_open(inbound_size, outbound_size);
+	
+	
+	
     ipod_state_set_callback(state_callback);
     request_now_playing();
     is_shown = true;
@@ -147,11 +152,14 @@ static void window_unload(Window* window) {
     is_shown = false;
 }
 
-static void click_config_provider(ClickConfig **config, void* context) {
-    config[BUTTON_ID_DOWN]->click.handler = clicked_down;
-    config[BUTTON_ID_UP]->click.handler = clicked_up;
-    config[BUTTON_ID_SELECT]->click.handler = clicked_select;
-    config[BUTTON_ID_SELECT]->long_click.handler = long_clicked_select;
+static void click_config_provider(ClickConfigProvider *config, void* context) {
+    
+	const uint16_t repeat_interval_ms = 50;
+	window_single_click_subscribe(BUTTON_ID_SELECT, (ClickHandler) clicked_select);
+	window_long_click_subscribe(BUTTON_ID_SELECT, 0, (ClickHandler)long_clicked_select, NULL);
+  	window_single_repeating_click_subscribe(BUTTON_ID_UP, repeat_interval_ms, (ClickHandler) clicked_up);
+  	window_single_repeating_click_subscribe(BUTTON_ID_DOWN, repeat_interval_ms, (ClickHandler) clicked_down);
+	
 }
 
 static void clicked_up(ClickRecognizerRef recognizer, void *context) {
@@ -187,8 +195,7 @@ static void send_state_change(int8_t state_change) {
     ipod_message_out_get(&iter);
     if(!iter) return;
     dict_write_int8(iter, IPOD_STATE_CHANGE_KEY, state_change);
-    app_message_out_send();
-    app_message_out_release();
+    app_message_outbox_send();
 }
 
 static void request_now_playing() {
@@ -196,8 +203,7 @@ static void request_now_playing() {
     ipod_message_out_get(&iter);
     if(!iter) return;
     dict_write_int8(iter, IPOD_NOW_PLAYING_KEY, 2);
-    app_message_out_send();
-    app_message_out_release();
+    app_message_outbox_send();
 }
 
 static void app_in_received(DictionaryIterator *received, void* context) {

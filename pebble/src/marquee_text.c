@@ -1,5 +1,3 @@
-#include "pebble_os.h"
-#include "pebble_fonts.h"
 #include "marquee_text.h"
 
 // This code is not generally useful unless this value is set to zero.
@@ -20,7 +18,8 @@ void marquee_text_layer_init(MarqueeTextLayer *marquee, GRect frame) {
     GRect bounds = layer_get_bounds(&marquee->layer);
     bounds.origin.x += BOUND_OFFSET;
     layer_set_bounds(&marquee->layer, bounds);
-    marquee->layer.update_proc = do_draw;
+    //marquee->layer.update_proc = do_draw;
+	layer_set_update_proc(&marquee->layer, do_draw);
     marquee->background_colour = GColorWhite;
     marquee->text_colour = GColorBlack;
     marquee->offset = 0;

@@ -1,7 +1,4 @@
-#include "pebble_os.h"
-#include "pebble_fonts.h"
 #include "library_menus.h"
-#include "common.h"
 #include "now_playing.h"
 
 #define MENU_CACHE_COUNT 25
@@ -39,12 +36,13 @@ static int16_t get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_ind
 static void window_disappeared(Window* window);
 
 void init_library_menus() {
-    app_callbacks = (AppMessageCallbacksNode){
-        .callbacks = {
-            .in_received = received_message
-        }
-    };
-    app_message_register_callbacks(&app_callbacks);
+	
+	app_message_register_inbox_received(received_message);
+
+   const uint32_t inbound_size = 128;
+   const uint32_t outbound_size = 256;
+   app_message_open(inbound_size, outbound_size);
+	
     menu_stack_pointer = -1;
     menu_font = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
 }
@@ -72,11 +70,9 @@ static bool send_library_request(MPMediaGrouping grouping, uint32_t offset) {
     dict_write_uint8(iter, IPOD_REQUEST_LIBRARY_KEY, grouping);
     dict_write_uint32(iter, IPOD_REQUEST_OFFSET_KEY, offset);
     build_parent_history(iter);
-    if(app_message_out_send() != APP_MSG_OK) goto failed;
-    app_message_out_release();
+    if(app_message_outbox_send() != APP_MSG_OK) goto failed;
     return true;
 failed:
-    app_message_out_release();
     return false;
 }
 
@@ -87,11 +83,9 @@ static bool play_track(uint16_t index) {
     dict_write_uint8(iter, IPOD_REQUEST_LIBRARY_KEY, menu->grouping);
     dict_write_uint16(iter, IPOD_PLAY_TRACK_KEY, menu->current_selection);
     build_parent_history(iter);
-    if(app_message_out_send() != APP_MSG_OK) goto failed;
-    app_message_out_release();
+    if(app_message_outbox_send() != APP_MSG_OK) goto failed;
     return true;
 failed:
-    app_message_out_release();
     return false;
 }
 
@@ -120,6 +114,7 @@ void display_library_view(MPMediaGrouping grouping) {
     window_set_window_handlers(&menu->window, (WindowHandlers) {
         .unload = window_disappeared,
     });
+	
     send_library_request(grouping, 0);
 }
 

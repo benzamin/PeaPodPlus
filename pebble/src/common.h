@@ -1,7 +1,7 @@
 #ifndef ipod_common_h
 #define ipod_common_h
 
-#include "pebble_os.h"
+#include <pebble.h>
 
 #define IPOD_RECONNECT_KEY 0xFEFF
 #define IPOD_REQUEST_LIBRARY_KEY 0xFEFE

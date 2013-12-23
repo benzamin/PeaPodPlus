@@ -1,7 +1,4 @@
 #include "notes_menu.h"
-#include "pebble_os.h"
-#include "pebble_app.h"
-#include "pebble_fonts.h"
 #include "common.h"
 //#include "note_details.h"
 	
@@ -49,13 +46,15 @@ static void displayErrorMessage(char *errorMessage)
 
 /* INIT */
 void notes_menu_init() {
-	
-	window_init(&notewindow, "Notes");
-    window_set_window_handlers(&notewindow, (WindowHandlers){
-        .unload = window_unload,
-        .load = window_load,
-    });
-    window_stack_push(&notewindow, true);
+	  window = window_create();
+	  window_set_background_color(window, GColorWhite);
+	  window_set_fullscreen(window, true);
+	  window_set_window_handlers(window, (WindowHandlers) {
+		.load = window_load,
+		.unload = window_unload
+	  });
+		
+	  window_stack_push(notewindow, true);
 }
 
 static void window_load(Window* window) {
@@ -69,15 +68,15 @@ static void window_load(Window* window) {
     layer_add_child(window_get_root_layer(window), &errorTextLayer.layer);
     layer_set_hidden(&errorTextLayer.layer, true);
 	
-	 app_callbacks = (AppMessageCallbacksNode){
-        .callbacks = {
-                .out_sent = messageSentSuccessfullyCallback,
-                .out_failed = messageSentWithErrorCallback,
-                .in_received = messageReceivedSuccessfullyCallback,
-                .in_dropped = messageReceivedWithErrorCallback,
-        }
-    };
-    app_message_register_callbacks(&app_callbacks);
+	
+	app_message_register_inbox_received(messageReceivedSuccessfullyCallback);
+   app_message_register_inbox_dropped(messageReceivedWithErrorCallback);
+   app_message_register_outbox_sent(messageSentSuccessfullyCallback);
+   app_message_register_outbox_failed(messageSentWithErrorCallback);
+
+   const uint32_t inbound_size = 128;
+   const uint32_t outbound_size = 256;
+   app_message_open(inbound_size, outbound_size);
 	
 	// Start
     requestNotes();
@@ -95,8 +94,7 @@ static void requestNotes()
     ipod_message_out_get(&iter);
     if(!iter) return;
     dict_write_int8(iter, GET_NOTES_LIST_KEY, 5);
-    app_message_out_send();
-    app_message_out_release();
+    app_message_outbox_send();
 
 }
 
@@ -242,8 +240,7 @@ static void requestNoteDetails(int index) {
     ipod_message_out_get(&iter);
     if(!iter) return;
     dict_write_int8(iter, GET_SPECIFIC_NOTE_KEY, index);
-    app_message_out_send();
-    app_message_out_release();
+    app_message_outbox_send();
 }
 
 /* Helpers */

@@ -1,7 +1,7 @@
 #ifndef ipod_progress_bar_h
 #define ipod_progress_bar_h
 
-#include "pebble_os.h"
+#include <pebble.h>
 
 typedef struct {
     Layer layer;

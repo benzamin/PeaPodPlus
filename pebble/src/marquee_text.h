@@ -1,7 +1,7 @@
 #ifndef ipod_marquee_text_h
 #define ipod_marquee_text_h
 
-#include "pebble_os.h"
+#include <pebble.h>
 
 typedef struct MarqueeTextLayer {
     Layer layer;
