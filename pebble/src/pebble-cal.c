@@ -62,9 +62,6 @@
 #define NOV 10
 #define DEC 11
 
-
-static const char *windowName = APP_NAME;
-
 static const char *monthNames[] = {
 #if LANG_CUR == LANG_DUTCH
 	"Januari", "Februari", "Maart", "April", "Mei", "Juni", "Juli", "Augustus", "September", "Oktober", "November", "December"
@@ -109,23 +106,21 @@ typedef struct {
 	int year;
 } Date;
 
-Window cal_window;
-Layer monthLayer;
-TextLayer monthNameLayer;
-Window reminderWindow;
+Window *cal_window;
+Layer *monthLayer;
+TextLayer *monthNameLayer;
+Window *reminderWindow;
 
 
-TextLayer eventsReminderTextLayer;
-ScrollLayer events_scroll_layer;
+TextLayer *eventsReminderTextLayer;
+ScrollLayer *events_scroll_layer;
 
-static AppMessageCallbacksNode app_callbacks;
 #define MAX_TEXT_LENGTH 499
 static char remindersString[MAX_TEXT_LENGTH];
 
 static void messageSentSuccessfullyCallback(DictionaryIterator *sent, void *context);
 static void messageSentWithErrorCallback(DictionaryIterator *failed, AppMessageResult reason, void *context);
 static void messageReceivedSuccessfullyCallback(DictionaryIterator *received, void *context);
-static void messageReceivedWithErrorCallback(void *context, AppMessageResult reason);
 static void requestEventsAndReminders();
 Date today;
 int displayedMonth, displayedYear;
@@ -235,7 +230,7 @@ static void dateAddDays(Date *date, int numDays) {
 	}
 }
 
-static int compareDates(Date *d1, Date *d2) {
+/*static int compareDates(Date *d1, Date *d2) {
 	if (d1->year < d2->year) {
 		return -1;
 	} else if (d1->year > d2->year) {
@@ -255,7 +250,7 @@ static int compareDates(Date *d1, Date *d2) {
 			}
 		}
 	}
-}
+}*/
 
 #if NWD_COUNTRY == NWD_FRANCE
 static void easterMonday(const int Y, Date *theDate) {
@@ -401,7 +396,7 @@ static bool isNonWorkingDay(const Date *theDate) {
 
 void updateMonthText() {
 	xsprintf(monthName, "%s %d", monthNames[displayedMonth], displayedYear);
-	text_layer_set_text(&monthNameLayer, monthName);
+	text_layer_set_text(monthNameLayer, monthName);
 }
 
 void updateMonth(Layer *layer, GContext *ctx) {
@@ -499,14 +494,14 @@ void updateMonth(Layer *layer, GContext *ctx) {
 	graphics_context_set_text_color(ctx, GColorWhite);
 	
 	for (i=s; i<s+7; i++) {
-		graphics_text_draw(ctx, weekDays[i%7], fonts_get_system_font(FONT_KEY_GOTHIC_14), GRect(DX+DW*(i+x-s), dy, DW+2, DH+1), GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
+		graphics_draw_text(ctx, weekDays[i%7], fonts_get_system_font(FONT_KEY_GOTHIC_14), GRect(DX+DW*(i+x-s), dy, DW+2, DH+1), GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
 	}
 	
 #if SHOW_WEEK_NUMBERS
 	// Week numbers
 	for (i=0, d=first; i<=numWeeks; i++, d.day+=7) {
 		xsprintf(numStr, "%d", weekNumber(&d));
-		graphics_text_draw(ctx, numStr, fonts_get_system_font(FONT_KEY_GOTHIC_14), GRect(DX, dy+DH*(i+1), DW, DH+1), GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
+		graphics_draw_text(ctx, numStr, fonts_get_system_font(FONT_KEY_GOTHIC_14), GRect(DX, dy+DH*(i+1), DW, DH+1), GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
 	}
 #endif
 	
@@ -533,16 +528,16 @@ void updateMonth(Layer *layer, GContext *ctx) {
 		if (today.day == i && today.month == displayedMonth && today.year == displayedYear) {
 			graphics_fill_rect(ctx, fillRect, 0, GCornerNone);
 			graphics_context_set_text_color(ctx, GColorWhite);
-			graphics_text_draw(ctx, numStr, f, rect, GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
+			graphics_draw_text(ctx, numStr, f, rect, GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
 		} else {
 			graphics_context_set_text_color(ctx, GColorBlack);
-			graphics_text_draw(ctx, numStr, f, rect, GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
+			graphics_draw_text(ctx, numStr, f, rect, GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
 		}
 	}
 }
 
 static int numClicks = 0;
-void btn_up_handler(ClickRecognizerRef recognizer, Window *window) {
+void btn_up_handler(ClickRecognizerRef recognizer, void *context){
 	numClicks = 0;
 }
 
@@ -559,7 +554,7 @@ void up_single_click_handler(ClickRecognizerRef recognizer, Window *window) {
 	}
 	
 	updateMonthText();
-	layer_mark_dirty(&monthLayer);
+	layer_mark_dirty(monthLayer);
 }
 
 
@@ -576,7 +571,7 @@ void down_single_click_handler(ClickRecognizerRef recognizer, Window *window) {
 	}
 	
 	updateMonthText();
-	layer_mark_dirty(&monthLayer);
+	layer_mark_dirty(monthLayer);
 	
 }
 
@@ -585,28 +580,30 @@ void select_single_click_handler(ClickRecognizerRef recognizer, Window *window) 
 	memcpy(remindersString, "Loading..." , 10);
 	memset(remindersString + 10, 0 , MAX_TEXT_LENGTH-10);
 	
-	window_init(&reminderWindow, "Events+Reminders");
-    window_stack_push(&reminderWindow, true);
+    reminderWindow = window_create();
+    window_stack_push(reminderWindow, true);
     
 	const GRect max_text_bounds = GRect(0, 0, 144, 2000);
     
-    text_layer_init(&eventsReminderTextLayer, max_text_bounds);
-    text_layer_set_text_color(&eventsReminderTextLayer, GColorBlack);
-    text_layer_set_background_color(&eventsReminderTextLayer, GColorWhite);
-    text_layer_set_text_alignment(&eventsReminderTextLayer, GTextAlignmentLeft);
-	text_layer_set_font(&eventsReminderTextLayer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
-    text_layer_set_text(&eventsReminderTextLayer, remindersString);
+    eventsReminderTextLayer = text_layer_create(max_text_bounds);
+    text_layer_set_text_color(eventsReminderTextLayer, GColorBlack);
+    text_layer_set_background_color(eventsReminderTextLayer, GColorWhite);
+    text_layer_set_text_alignment(eventsReminderTextLayer, GTextAlignmentLeft);
+	text_layer_set_font(eventsReminderTextLayer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+    text_layer_set_text(eventsReminderTextLayer, remindersString);
     
   	//set up scroll layer
-  	scroll_layer_init(&events_scroll_layer, reminderWindow.layer.bounds);
- 	scroll_layer_set_click_config_onto_window(&events_scroll_layer, &reminderWindow);
+    events_scroll_layer = scroll_layer_create(layer_get_bounds(window_get_root_layer(reminderWindow)));
+                                              
+ 	scroll_layer_set_click_config_onto_window(events_scroll_layer, reminderWindow);
 	// Set the initial max size
-  	scroll_layer_set_content_size(&events_scroll_layer, max_text_bounds.size);
+  	scroll_layer_set_content_size(events_scroll_layer, max_text_bounds.size);
     
   	// Add the layers for display
-  	scroll_layer_add_child(&events_scroll_layer, &eventsReminderTextLayer.layer);
+  	scroll_layer_add_child(events_scroll_layer, text_layer_get_layer(eventsReminderTextLayer));
+
     
-  	layer_add_child(&reminderWindow.layer, &events_scroll_layer.layer);
+  	layer_add_child(window_get_root_layer(reminderWindow), scroll_layer_get_layer(events_scroll_layer));
     
 	requestEventsAndReminders();
 }
@@ -617,9 +614,9 @@ static void long_clicked_select(ClickRecognizerRef recognizer, void *context)
 	displayedYear = today.year;
 	
 	updateMonthText();
-	layer_mark_dirty(&monthLayer);
+	layer_mark_dirty(monthLayer);
 }
-void click_config_provider(ClickConfigProvider *config, Window *window) {
+void click_config_provider(void *context) {
 	/*config[BUTTON_ID_SELECT]->click.handler = (ClickHandler) select_single_click_handler;
 	config[BUTTON_ID_SELECT]->long_click.handler = (ClickHandler) long_clicked_select;
 	
@@ -645,19 +642,20 @@ void click_config_provider(ClickConfigProvider *config, Window *window) {
 	
 }
 
-void handle_tick(AppContextRef ctx, PebbleTickEvent *t) {
+//dont need this for this time
+/*void handle_tick(AppContextRef ctx, PebbleTickEvent *t) {
 	updateMonthText();
 	layer_mark_dirty(&monthLayer);
-}
+}*/
 
 //void handle_init(AppContextRef ctx) {
 static void window_load(Window* window) {
-	PblTm now;
-    
-	get_time(&now);
-	today.day = now.tm_mday;
-	today.month = now.tm_mon;
-	today.year = now.tm_year + 1900;
+
+    time_t now = time(NULL);
+  	struct tm *t = localtime(&now);
+	today.day = t->tm_mday;
+	today.month = t->tm_mon;
+	today.year = t->tm_year + 1900;
 	
 	displayedMonth = today.month;
 	displayedYear = today.year;
@@ -674,18 +672,18 @@ static void window_load(Window* window) {
     
 	//myFont = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_15));
     
-	text_layer_init(&monthNameLayer, GRect(0, 0, SCREENW, MONTHNAME_LAYER_HEIGHT));
-	text_layer_set_background_color(&monthNameLayer, GColorWhite);
-	text_layer_set_text_color(&monthNameLayer, GColorBlack);
-	text_layer_set_font(&monthNameLayer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
-	text_layer_set_text_alignment(&monthNameLayer, GTextAlignmentCenter);
-	layer_add_child(window_get_root_layer(window), &monthNameLayer.layer);
+    monthNameLayer = text_layer_create(GRect(0, 0, SCREENW, MONTHNAME_LAYER_HEIGHT));
+	text_layer_set_background_color(monthNameLayer, GColorWhite);
+	text_layer_set_text_color(monthNameLayer, GColorBlack);
+	text_layer_set_font(monthNameLayer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+	text_layer_set_text_alignment(monthNameLayer, GTextAlignmentCenter);
+	layer_add_child(window_get_root_layer(window), text_layer_get_layer(monthNameLayer));
 	
 	updateMonthText();
 	
-	layer_init(&monthLayer, GRect(0, MONTHNAME_LAYER_HEIGHT, SCREENW, MONTH_LAYER_HEIGHT));
-	layer_set_update_proc(&monthLayer, &updateMonth);
-	layer_add_child(window_get_root_layer(window), &monthLayer);
+    monthLayer = layer_create(GRect(0, MONTHNAME_LAYER_HEIGHT, SCREENW, MONTH_LAYER_HEIGHT));
+	layer_set_update_proc(monthLayer, &updateMonth);
+	layer_add_child(window_get_root_layer(window), monthLayer);
 	
 	window_set_click_config_provider(window, click_config_provider);
 	
@@ -700,7 +698,6 @@ static void window_load(Window* window) {
     app_message_register_callbacks(&app_callbacks);*/
 	
 	app_message_register_inbox_received(messageReceivedSuccessfullyCallback);
-   app_message_register_inbox_dropped(messageReceivedWithErrorCallback);
    app_message_register_outbox_sent(messageSentSuccessfullyCallback);
    app_message_register_outbox_failed(messageSentWithErrorCallback);
 
@@ -714,16 +711,16 @@ static void window_load(Window* window) {
 
 //void handle_deinit(AppContextRef ctx) {
 static void window_unload(Window* window) {
-	app_message_deregister_callbacks(&app_callbacks);
+	app_message_deregister_callbacks();
 }
 
 /* INIT */
 void pebble_cal_init() {
 	
-	  window = window_create();
-	  window_set_background_color(window, GColorWhite);
-	  window_set_fullscreen(window, true);
-	  window_set_window_handlers(window, (WindowHandlers) {
+	  cal_window = window_create();
+	  window_set_background_color(cal_window, GColorWhite);
+	  window_set_fullscreen(cal_window, true);
+	  window_set_window_handlers(cal_window, (WindowHandlers) {
 		.load = window_load,
 		.unload = window_unload
 	  });
@@ -750,7 +747,7 @@ static void messageSentWithErrorCallback(DictionaryIterator *failed, AppMessageR
 {
     memcpy(remindersString, "Cant find Phone :(" , 18);
 	memset(remindersString + 18, 0 , MAX_TEXT_LENGTH-18);
-    layer_mark_dirty(&eventsReminderTextLayer.layer);
+    layer_mark_dirty(text_layer_get_layer(eventsReminderTextLayer));
 }
 
 static void messageReceivedSuccessfullyCallback(DictionaryIterator *received, void *context)
@@ -764,13 +761,10 @@ static void messageReceivedSuccessfullyCallback(DictionaryIterator *received, vo
         memcpy(remindersString + offset, tuple->value->data + 1, tuple->length - 1);
         
 		// Trim text layer and scroll content to fit text box
-  		GSize max_size = text_layer_get_max_used_size(app_get_current_graphics_context(), &eventsReminderTextLayer);
-  		text_layer_set_size(&eventsReminderTextLayer, max_size);
-  		scroll_layer_set_content_size(&events_scroll_layer, GSize(144, max_size.h + vert_scroll_text_padding));
+        GSize max_size = text_layer_get_content_size(eventsReminderTextLayer);
+  		text_layer_set_size(eventsReminderTextLayer, max_size);
+  		scroll_layer_set_content_size(events_scroll_layer, GSize(144, max_size.h + vert_scroll_text_padding));
 		//layer_mark_dirty(&eventsReminderTextLayer.layer);
     }
 }
 
-static void messageReceivedWithErrorCallback(AppMessageResult reason, void *context )
-{
-}

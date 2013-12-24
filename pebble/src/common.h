@@ -1,7 +1,7 @@
 #ifndef ipod_common_h
 #define ipod_common_h
 
-#include <pebble.h>
+#include "pebble.h"
 
 #define IPOD_RECONNECT_KEY 0xFEFF
 #define IPOD_REQUEST_LIBRARY_KEY 0xFEFE
@@ -71,7 +71,7 @@ typedef enum {
 AppMessageResult ipod_message_out_get(DictionaryIterator **iter_out);
 void reset_sequence_number();
 char* itoa(int i);
-extern AppContextRef g_app_context;
+//extern AppContextRef g_app_context;
 void itoa1(int i, char* a);
 void itoa2(int i, char* a);
 time_t get_pebble_time();

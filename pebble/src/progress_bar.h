@@ -1,10 +1,10 @@
 #ifndef ipod_progress_bar_h
 #define ipod_progress_bar_h
 
-#include <pebble.h>
+#include "pebble.h"
 
 typedef struct {
-    Layer layer;
+    Layer *layer;
     int32_t min;
     int32_t max;
     int32_t value;
@@ -18,3 +18,4 @@ void progress_bar_layer_set_range(ProgressBarLayer* bar, int32_t min, int32_t ma
 void progress_bar_layer_set_value(ProgressBarLayer* bar, int32_t value);
 
 #endif
+

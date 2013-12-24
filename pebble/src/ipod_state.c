@@ -3,7 +3,6 @@
 static void in_received(DictionaryIterator *received, void *context);
 static void call_callback(bool track_data);
 
-static AppMessageCallbacksNode app_callbacks;
 static iPodStateCallback state_callback;
 
 static MPMusicRepeatMode s_repeat_mode;

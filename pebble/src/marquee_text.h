@@ -1,10 +1,10 @@
 #ifndef ipod_marquee_text_h
 #define ipod_marquee_text_h
 
-#include <pebble.h>
+#include "pebble.h"
 
 typedef struct MarqueeTextLayer {
-    Layer layer;
+    Layer *layer;
     const char* text;
     GFont font;
     GColor text_colour;

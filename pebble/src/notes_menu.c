@@ -2,16 +2,14 @@
 #include "common.h"
 //#include "note_details.h"
 	
-Window notewindow;
-Window detailWindow;
+Window *notewindow;
+Window *detailWindow;
 
-TextLayer errorTextLayer;
-TextLayer fullReminderTitleTextLayer;
-ScrollLayer scroll_layer;
+TextLayer *errorTextLayer;
+TextLayer *fullReminderTitleTextLayer;
+ScrollLayer *scroll_layer;
 
-static AppMessageCallbacksNode app_callbacks;
-
-SimpleMenuLayer menuLayer;
+SimpleMenuLayer *menuLayer;
 SimpleMenuSection sections[1];
 
 #define MAX_NOTES 5
@@ -26,7 +24,7 @@ static char noteString[MAX_NOTE_TEXT_LENGTH];
 static void messageSentSuccessfullyCallback(DictionaryIterator *sent, void *context);
 static void messageSentWithErrorCallback(DictionaryIterator *failed, AppMessageResult reason, void *context);
 static void messageReceivedSuccessfullyCallback(DictionaryIterator *received, void *context);
-static void messageReceivedWithErrorCallback(void *context, AppMessageResult reason);
+static void messageReceivedWithErrorCallback(AppMessageResult reason, void *context);
 static void requestNotes();
 static void requestNoteDetails(int index);
 static void addMenuItem(int index, char *title);
@@ -40,16 +38,16 @@ static void window_load(Window* window);
 
 static void displayErrorMessage(char *errorMessage)
 {
-    text_layer_set_text(&errorTextLayer, errorMessage);
-    layer_set_hidden(&errorTextLayer.layer, false);
+    text_layer_set_text(errorTextLayer, errorMessage);
+    layer_set_hidden(text_layer_get_layer(errorTextLayer), false);
 }
 
 /* INIT */
 void notes_menu_init() {
-	  window = window_create();
-	  window_set_background_color(window, GColorWhite);
-	  window_set_fullscreen(window, true);
-	  window_set_window_handlers(window, (WindowHandlers) {
+	  notewindow = window_create();
+	  window_set_background_color(notewindow, GColorWhite);
+	  window_set_fullscreen(notewindow, true);
+	  window_set_window_handlers(notewindow, (WindowHandlers) {
 		.load = window_load,
 		.unload = window_unload
 	  });
@@ -59,14 +57,14 @@ void notes_menu_init() {
 
 static void window_load(Window* window) {
 	    // Error text layer
-    text_layer_init(&errorTextLayer,  GRect(0, 0, 144, 152));
-    text_layer_set_text_color(&errorTextLayer, GColorBlack);
-    text_layer_set_background_color(&errorTextLayer, GColorWhite);
-    text_layer_set_font(&errorTextLayer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
-    text_layer_set_text_alignment(&errorTextLayer, GTextAlignmentCenter);
-    text_layer_set_text(&errorTextLayer, "text");
-    layer_add_child(window_get_root_layer(window), &errorTextLayer.layer);
-    layer_set_hidden(&errorTextLayer.layer, true);
+    errorTextLayer = text_layer_create(GRect(0, 0, 144, 152));
+    text_layer_set_text_color(errorTextLayer, GColorBlack);
+    text_layer_set_background_color(errorTextLayer, GColorWhite);
+    text_layer_set_font(errorTextLayer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
+    text_layer_set_text_alignment(errorTextLayer, GTextAlignmentCenter);
+    text_layer_set_text(errorTextLayer, "text");
+    layer_add_child(window_get_root_layer(window), text_layer_get_layer(errorTextLayer));
+    layer_set_hidden(text_layer_get_layer(errorTextLayer), true);
 	
 	
 	app_message_register_inbox_received(messageReceivedSuccessfullyCallback);
@@ -83,7 +81,7 @@ static void window_load(Window* window) {
 }
 static void window_unload(Window* window) 
 {
-	app_message_deregister_callbacks(&app_callbacks);
+	app_message_deregister_callbacks();
 }
 
 /* MESSAGE HANDLING */
@@ -119,9 +117,9 @@ static void messageReceivedSuccessfullyCallback(DictionaryIterator *received, vo
         memcpy(noteString + offset, tuple->value->data + 1, tuple->length - 1);
         
 		// Trim text layer and scroll content to fit text box
-  		GSize max_size = text_layer_get_max_used_size(app_get_current_graphics_context(), &fullReminderTitleTextLayer);
-  		text_layer_set_size(&fullReminderTitleTextLayer, max_size);
-  		scroll_layer_set_content_size(&scroll_layer, GSize(144, max_size.h + vert_scroll_text_padding));
+        GSize max_size = text_layer_get_content_size(fullReminderTitleTextLayer);
+  		text_layer_set_size(fullReminderTitleTextLayer, max_size);
+  		scroll_layer_set_content_size(scroll_layer, GSize(144, max_size.h + vert_scroll_text_padding));
 		//layer_mark_dirty(&fullReminderTitleTextLayer.layer);
 		
 		return;
@@ -168,7 +166,7 @@ static void messageReceivedSuccessfullyCallback(DictionaryIterator *received, vo
     createMenu(index);
 }
 
-static void messageReceivedWithErrorCallback(void *context, AppMessageResult reason)
+static void messageReceivedWithErrorCallback(AppMessageResult reason, void *context)
 {
     displayErrorMessage(appMessageResultToString(reason));
 }
@@ -190,14 +188,13 @@ static void createMenu(int numElements)
     // Menu
     sections[0] = (SimpleMenuSection){.items = menuItems, .num_items = numElements, .title = "Notes"};
 
-    simple_menu_layer_init(&menuLayer,
-                           GRect(0, 0, 144, 152),
-                           &notewindow,
-                           sections,
-                           1,
-                           NULL);
+    menuLayer = simple_menu_layer_create(GRect(0, 0, 144, 152),
+                             notewindow,
+                             sections,
+                             1,
+                             NULL);
 
-    layer_add_child(&notewindow.layer, simple_menu_layer_get_layer(&menuLayer));
+    layer_add_child(window_get_root_layer(notewindow), simple_menu_layer_get_layer(menuLayer));
 }
 
 static void simpleMenuItemSelectedCallback(int index, void *context)
@@ -206,30 +203,31 @@ static void simpleMenuItemSelectedCallback(int index, void *context)
 	memcpy(noteString, "Loading..." , 10);
 	memset(noteString + 10, 0 , MAX_NOTE_TEXT_LENGTH-10);
 	
-	const char *noteSelected = ((SimpleMenuItem)menuItems[index]).title;	
-	 window_init(&detailWindow, noteSelected);
-    window_stack_push(&detailWindow, true);
+	//const char *noteSelected = ((SimpleMenuItem)menuItems[index]).title;
+	
+    detailWindow = window_create();
+    window_stack_push(detailWindow, true);
 
 	const GRect max_text_bounds = GRect(0, 0, 144, 2000);
 
-    text_layer_init(&fullReminderTitleTextLayer, max_text_bounds);
-    text_layer_set_text_color(&fullReminderTitleTextLayer, GColorBlack);
-    text_layer_set_background_color(&fullReminderTitleTextLayer, GColorWhite);
-    text_layer_set_text_alignment(&fullReminderTitleTextLayer, GTextAlignmentLeft);
-	text_layer_set_font(&fullReminderTitleTextLayer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
-    text_layer_set_text(&fullReminderTitleTextLayer, noteString);
+    fullReminderTitleTextLayer = text_layer_create(max_text_bounds);
+    text_layer_set_text_color(fullReminderTitleTextLayer, GColorBlack);
+    text_layer_set_background_color(fullReminderTitleTextLayer, GColorWhite);
+    text_layer_set_text_alignment(fullReminderTitleTextLayer, GTextAlignmentLeft);
+	text_layer_set_font(fullReminderTitleTextLayer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+    text_layer_set_text(fullReminderTitleTextLayer, noteString);
     //layer_add_child(&detailWindow.layer, &fullReminderTitleTextLayer.layer);
 		
   	//set up scroll layer
-  	scroll_layer_init(&scroll_layer, detailWindow.layer.bounds);
- 	scroll_layer_set_click_config_onto_window(&scroll_layer, &detailWindow);
+    scroll_layer = scroll_layer_create(layer_get_bounds(window_get_root_layer(detailWindow)));
+ 	scroll_layer_set_click_config_onto_window(scroll_layer, detailWindow);
 	// Set the initial max size
-  	scroll_layer_set_content_size(&scroll_layer, max_text_bounds.size);
+  	scroll_layer_set_content_size(scroll_layer, max_text_bounds.size);
 
   	// Add the layers for display
-  	scroll_layer_add_child(&scroll_layer, &fullReminderTitleTextLayer.layer);
+  	scroll_layer_add_child(scroll_layer, text_layer_get_layer(fullReminderTitleTextLayer));
 
-  	layer_add_child(&detailWindow.layer, &scroll_layer.layer);
+  	layer_add_child(window_get_root_layer(detailWindow), scroll_layer_get_layer(scroll_layer));
 
 	//now request Phone to deiver the note
 	requestNoteDetails(index);

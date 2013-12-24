@@ -1,6 +1,11 @@
 #ifndef ipod_ipod_h
 #define ipod_ipod_h
 
-void set_peapod_running(bool val);
+
+#include "pebble.h"
+
+#include "library_menus.h"
+#include "ipod_state.h"
+
 
 #endif

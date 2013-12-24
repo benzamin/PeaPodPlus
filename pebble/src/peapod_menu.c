@@ -4,7 +4,7 @@
 #include "now_playing.h"
 #include "ipod.h"
 
-static Window window;
+static Window *window;
 
 static void open_now_playing(int index, void* context);
 static void open_artist_list(int index, void* context);
@@ -49,7 +49,7 @@ static SimpleMenuSection section = {
 	.title = "Peapod Menu"
 };
 
-static SimpleMenuLayer main_menu_layer;
+static SimpleMenuLayer *main_menu_layer;
 
 
 void peapod_menu_init() {
@@ -66,8 +66,8 @@ void peapod_menu_init() {
 }
 
 static void window_load(Window* window) {
-	simple_menu_layer_init(&main_menu_layer, GRect(0, 0, 144, 152), window, &section, 1, NULL);
-    layer_add_child(window_get_root_layer(window), simple_menu_layer_get_layer(&main_menu_layer));
+    main_menu_layer = simple_menu_layer_create(GRect(0, 0, 144, 152), window, &section, 1, NULL);
+    layer_add_child(window_get_root_layer(window), simple_menu_layer_get_layer(main_menu_layer));
 }
 
 static void window_unload(Window* window) {

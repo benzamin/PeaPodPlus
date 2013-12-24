@@ -5,27 +5,26 @@
 #include "common.h"
 #include "ipod.h"
 
-static Window window;
-static ActionBarLayer action_bar;
+static Window *window;
+static ActionBarLayer *action_bar;
 static MarqueeTextLayer title_layer;
 static MarqueeTextLayer album_layer;
 static MarqueeTextLayer artist_layer;
-static BitmapLayer album_art_layer;
+static BitmapLayer *album_art_layer;
 static GBitmap album_art_bitmap;
 static uint8_t album_art_data[512];
 static ProgressBarLayer progress_bar;
 
 // Action bar icons
-static HeapBitmap icon_pause;
-static HeapBitmap icon_play;
-static HeapBitmap icon_fast_forward;
-static HeapBitmap icon_rewind;
-static HeapBitmap icon_volume_up;
-static HeapBitmap icon_volume_down;
+static GBitmap *icon_pause = NULL;
+static GBitmap *icon_play = NULL;
+static GBitmap *icon_fast_forward = NULL;
+static GBitmap *icon_rewind = NULL;
+static GBitmap *icon_volume_up = NULL;
+static GBitmap *icon_volume_down = NULL;
 
-static AppMessageCallbacksNode app_callbacks;
 
-static void click_config_provider(ClickConfigProvider **config, void *context);
+static void click_config_provider(void *context);
 static void window_unload(Window* window);
 static void window_load(Window* window);
 static void clicked_up(ClickRecognizerRef recognizer, void *context);
@@ -42,7 +41,7 @@ static void display_no_album();
 
 static bool controlling_volume = false;
 static bool is_shown = false;
-static AppTimer timer;
+static AppTimer *timer;
 //static AppTimerCallback now_playing_animation_tick;
 
 void show_now_playing() {
@@ -71,21 +70,24 @@ void now_playing_animation_tick() {
 
 static void window_load(Window* window) {
     // Load bitmaps for action bar icons.
-    heap_bitmap_init(&icon_pause, RESOURCE_ID_ICON_PAUSE);
-    heap_bitmap_init(&icon_play, RESOURCE_ID_ICON_PLAY);
-    heap_bitmap_init(&icon_fast_forward, RESOURCE_ID_ICON_FAST_FORWARD);
-    heap_bitmap_init(&icon_rewind, RESOURCE_ID_ICON_REWIND);
-    heap_bitmap_init(&icon_volume_up, RESOURCE_ID_ICON_VOLUME_UP);
-    heap_bitmap_init(&icon_volume_down, RESOURCE_ID_ICON_VOLUME_DOWN);
+    icon_pause = gbitmap_create_with_resource(RESOURCE_ID_ICON_PAUSE);///
+    icon_play = gbitmap_create_with_resource(RESOURCE_ID_ICON_PLAY);///
+    icon_fast_forward = gbitmap_create_with_resource(RESOURCE_ID_ICON_FAST_FORWARD);///
+    icon_rewind = gbitmap_create_with_resource(RESOURCE_ID_ICON_REWIND);///
+    icon_volume_up = gbitmap_create_with_resource(RESOURCE_ID_ICON_VOLUME_UP);///
+    icon_volume_down = gbitmap_create_with_resource(RESOURCE_ID_ICON_VOLUME_DOWN);///
+    
     // Action bar
-    action_bar_layer_init(&action_bar);
-    action_bar_layer_add_to_window(&action_bar, window);
-    action_bar_layer_set_click_config_provider(&action_bar, click_config_provider);
+    action_bar = action_bar_layer_create();
+    action_bar_layer_add_to_window(action_bar, window);
+    action_bar_layer_set_click_config_provider(action_bar, click_config_provider);
     controlling_volume = false;
+
     // Set default icon set.
-    action_bar_layer_set_icon(&action_bar, BUTTON_ID_DOWN, &icon_fast_forward.bmp);
-    action_bar_layer_set_icon(&action_bar, BUTTON_ID_UP, &icon_rewind.bmp);
-    action_bar_layer_set_icon(&action_bar, BUTTON_ID_SELECT, &icon_play.bmp);
+    action_bar_layer_set_icon(action_bar, BUTTON_ID_SELECT, icon_fast_forward);///
+    action_bar_layer_set_icon(action_bar, BUTTON_ID_DOWN, icon_rewind);///
+    action_bar_layer_set_icon(action_bar, BUTTON_ID_UP, icon_play);///
+    
     
     // Text labels
     marquee_text_layer_init(&title_layer, GRect(2, 0, 118, 35));
@@ -98,9 +100,9 @@ static void window_load(Window* window) {
     marquee_text_layer_set_font(&artist_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
     marquee_text_layer_set_text(&artist_layer, ipod_get_artist());
     
-    layer_add_child(window_get_root_layer(window), &title_layer.layer);
-    layer_add_child(window_get_root_layer(window), &album_layer.layer);
-    layer_add_child(window_get_root_layer(window), &artist_layer.layer);
+    layer_add_child(window_get_root_layer(window), title_layer.layer);
+    layer_add_child(window_get_root_layer(window), album_layer.layer);
+    layer_add_child(window_get_root_layer(window), artist_layer.layer);
     
     // Progress bar
     progress_bar_layer_init(&progress_bar, GRect(10, 105, 104, 7));
@@ -114,9 +116,9 @@ static void window_load(Window* window) {
         .row_size_bytes = 8,
     };
     //memset(album_art_data, 0, 512);
-    bitmap_layer_init(&album_art_layer, GRect(30, 35, 64, 64));
-    bitmap_layer_set_bitmap(&album_art_layer, &album_art_bitmap);
-    layer_add_child(window_get_root_layer(window), &album_art_layer.layer);
+    album_art_layer = bitmap_layer_create(GRect(30, 35, 64, 64));
+    bitmap_layer_set_bitmap(album_art_layer, &album_art_bitmap);
+    layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(album_art_layer));
     display_no_album();
     
 	app_message_register_inbox_received(app_in_received);
@@ -134,25 +136,19 @@ static void window_load(Window* window) {
 }
 
 static void window_unload(Window* window) {
-    action_bar_layer_remove_from_window(&action_bar);
+    action_bar_layer_remove_from_window(action_bar);
     marquee_text_layer_deinit(&title_layer);
     marquee_text_layer_deinit(&album_layer);
     marquee_text_layer_deinit(&artist_layer);
-    app_message_deregister_callbacks(&app_callbacks);
+    app_message_deregister_callbacks();
     
     // deinit action bar icons
-    heap_bitmap_deinit(&icon_pause);
-    heap_bitmap_deinit(&icon_play);
-    heap_bitmap_deinit(&icon_fast_forward);
-    heap_bitmap_deinit(&icon_rewind);
-    heap_bitmap_deinit(&icon_volume_up);
-    heap_bitmap_deinit(&icon_volume_down);
     
     ipod_state_set_callback(NULL);
     is_shown = false;
 }
 
-static void click_config_provider(ClickConfigProvider *config, void* context) {
+static void click_config_provider(void* context) {
     
 	const uint16_t repeat_interval_ms = 50;
 	window_single_click_subscribe(BUTTON_ID_SELECT, (ClickHandler) clicked_select);
@@ -182,11 +178,13 @@ static void clicked_down(ClickRecognizerRef recognizer, void *context) {
 static void long_clicked_select(ClickRecognizerRef recognizer, void *context) {
     controlling_volume = !controlling_volume;
     if(controlling_volume) {
-        action_bar_layer_set_icon(&action_bar, BUTTON_ID_UP, &icon_volume_up.bmp);
-        action_bar_layer_set_icon(&action_bar, BUTTON_ID_DOWN, &icon_volume_down.bmp);
+        action_bar_layer_set_icon(action_bar, BUTTON_ID_DOWN, icon_volume_down);///
+        action_bar_layer_set_icon(action_bar, BUTTON_ID_UP, icon_volume_up);///
+        
     } else {
-        action_bar_layer_set_icon(&action_bar, BUTTON_ID_DOWN, &icon_fast_forward.bmp);
-        action_bar_layer_set_icon(&action_bar, BUTTON_ID_UP, &icon_rewind.bmp);
+        action_bar_layer_set_icon(action_bar, BUTTON_ID_DOWN, icon_fast_forward);///
+        action_bar_layer_set_icon(action_bar, BUTTON_ID_UP, icon_rewind);///
+
     }
 }
 
@@ -215,7 +213,7 @@ static void app_in_received(DictionaryIterator *received, void* context) {
         } else {
             size_t offset = tuple->value->data[0] * 104;
             memcpy(album_art_data + offset, tuple->value->data + 1, tuple->length - 1);
-            layer_mark_dirty(&album_art_layer.layer);
+            layer_mark_dirty(bitmap_layer_get_layer(album_art_layer));
         }
     }
 }
@@ -228,9 +226,9 @@ static void state_callback(bool track_data) {
         marquee_text_layer_set_text(&title_layer, ipod_get_title());
     } else {
         if(ipod_get_playback_state() == MPMusicPlaybackStatePlaying) {
-            action_bar_layer_set_icon(&action_bar, BUTTON_ID_SELECT, &icon_pause.bmp);
+            action_bar_layer_set_icon(action_bar, BUTTON_ID_SELECT, icon_pause);///
         } else {
-            action_bar_layer_set_icon(&action_bar, BUTTON_ID_SELECT, &icon_play.bmp);
+            action_bar_layer_set_icon(action_bar, BUTTON_ID_SELECT, icon_play);///
         }
         progress_bar_layer_set_range(&progress_bar, 0, ipod_state_duration());
         progress_bar_layer_set_value(&progress_bar, ipod_state_current_time());

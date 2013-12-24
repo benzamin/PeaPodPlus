@@ -1,4 +1,4 @@
-#include <pebble.h>
+#include "pebble.h"
 #ifndef ipod_camera_capture_h
 #define ipod_camera_capture_h
 

@@ -3,9 +3,9 @@
 static void update_proc(Layer* layer, GContext *context);
 
 void progress_bar_layer_init(ProgressBarLayer* bar, GRect frame) {
-    layer_init(&bar->layer, frame);
+    bar->layer = layer_create(frame);
     //bar->layer.update_proc = update_proc;
-	layer_set_update_proc(&bar->layer, update_proc);
+	layer_set_update_proc(bar->layer, update_proc);
     bar->min = 0;
     bar->max = 255;
     bar->value = 0;
@@ -17,12 +17,12 @@ void progress_bar_layer_init(ProgressBarLayer* bar, GRect frame) {
 void progress_bar_layer_set_range(ProgressBarLayer* bar, int32_t min, int32_t max) {
     bar->max = max;
     bar->min = min;
-    layer_mark_dirty(&bar->layer);
+    layer_mark_dirty(bar->layer);
 }
 
 void progress_bar_layer_set_value(ProgressBarLayer* bar, int32_t value) {
     bar->value = value;
-    layer_mark_dirty(&bar->layer);
+    layer_mark_dirty(bar->layer);
 }
 
 static void update_proc(Layer* layer, GContext *context) {

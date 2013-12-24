@@ -20,7 +20,7 @@ void reset_sequence_number() {
     app_message_outbox_send();
 }
 
-AppContextRef g_app_context;
+//AppContextRef g_app_context;
 
 #define INT_DIGITS 5		/* enough for 64 bit integer */
 
@@ -69,17 +69,17 @@ void itoa2(int num, char* buffer) {
 // Milliseconds since January 1st 2012 in some timezone, discounting leap years.
 // There must be a better way to do this...
 time_t get_pebble_time() {
-    PblTm t;
-    get_time(&t);
-    time_t seconds = t.tm_sec;
-    seconds += t.tm_min * 60; 
-    seconds += t.tm_hour * 3600;
-    seconds += t.tm_yday * 86400;
-    seconds += (t.tm_year - 2012) * 31536000;
+    time_t now = time(NULL);
+  	struct tm *t = localtime(&now);
+    time_t seconds = t->tm_sec;
+    seconds += t->tm_min * 60;
+    seconds += t->tm_hour * 3600;
+    seconds += t->tm_yday * 86400;
+    seconds += (t->tm_year - 2012) * 31536000;
     return seconds * 1000;
 }
 
-void format_lap(time_t lap_time, char* buffer) {
+/*void format_lap(time_t lap_time, char* buffer) {
     int hundredths = (lap_time / 100) % 10;
     int seconds = (lap_time / 1000) % 60;
     int minutes = (lap_time / 60000) % 60;
@@ -92,4 +92,4 @@ void format_lap(time_t lap_time, char* buffer) {
     itoa2(seconds, &buffer[6]);
     buffer[8] = '.';
     itoa1(hundredths, &buffer[9]);
-}
+}*/

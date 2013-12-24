@@ -7,8 +7,8 @@
 #define MAX_MENU_ENTRIES 1170
 
 typedef struct {
-    MenuLayer layer;
-    Window window;
+    MenuLayer *layer;
+    Window *window;
     char menu_entries[MENU_CACHE_COUNT][MENU_ENTRY_LENGTH];
     uint16_t total_entry_count;
     uint16_t current_entry_offset;
@@ -20,7 +20,6 @@ typedef struct {
 static LibraryMenu menu_stack[MENU_STACK_DEPTH];
 static int8_t menu_stack_pointer;
 
-static AppMessageCallbacksNode app_callbacks;
 static GFont menu_font;
 
 static bool send_library_request(MPMediaGrouping grouping, uint32_t offset);
@@ -98,20 +97,21 @@ void display_library_view(MPMediaGrouping grouping) {
     menu->last_entry = 0;
     menu->current_selection = 0;
     memset(menu->menu_entries, 0, MENU_CACHE_COUNT * MENU_ENTRY_LENGTH);
-    window_init(&menu->window, "Library window");
-    menu_layer_init(&menu->layer, GRect(0, 0, 144, 152));
-    menu_layer_set_click_config_onto_window(&menu->layer, &menu->window);
-    menu_layer_set_callbacks(&menu->layer, menu, (MenuLayerCallbacks){
+
+    menu->window = window_create();
+    menu->layer = menu_layer_create(GRect(0, 0, 144, 152));
+    menu_layer_set_click_config_onto_window(menu->layer, menu->window);
+    menu_layer_set_callbacks(menu->layer, menu, (MenuLayerCallbacks){
         .get_num_rows = get_num_rows,
         .draw_row = draw_row,
         .selection_changed = selection_changed,
         .select_click = select_click,
         .get_cell_height = get_cell_height,
     });
-    layer_add_child(window_get_root_layer(&menu->window), menu_layer_get_layer(&menu->layer));
+    layer_add_child(window_get_root_layer(menu->window), menu_layer_get_layer(menu->layer));
     
-    window_stack_push(&menu->window, true);
-    window_set_window_handlers(&menu->window, (WindowHandlers) {
+    window_stack_push(menu->window, true);
+    window_set_window_handlers(menu->window, (WindowHandlers) {
         .unload = window_disappeared,
     });
 	
@@ -125,8 +125,8 @@ static void received_message(DictionaryIterator *received, void* context) {
     if(tuple) {
         MPMediaGrouping grouping = tuple->value->data[0];
         if(grouping != menu->grouping) return; // Not what we wanted.
-        uint16_t total_size = *(uint16_t*)&tuple->value->data[1];
-        uint16_t offset = *(uint16_t*)&tuple->value->data[3];
+        uint16_t total_size = (uint16_t)tuple->value->data[1];
+        uint16_t offset = (uint16_t)tuple->value->data[3];
         int8_t insert_pos = offset - menu->current_entry_offset;
         menu->total_entry_count = total_size;
         uint8_t skipping = 0;
@@ -162,7 +162,7 @@ static void received_message(DictionaryIterator *received, void* context) {
             }
             j += len;
         }
-        menu_layer_reload_data(&menu->layer);
+        menu_layer_reload_data(menu->layer);
     }
 }
 
@@ -188,11 +188,14 @@ static void draw_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_ind
     if(pos >= MENU_CACHE_COUNT || pos < 0) return;
     //menu_cell_basic_draw(ctx, cell_layer, menu->menu_entries[pos], NULL, NULL);
     graphics_context_set_text_color(ctx, GColorBlack);
-    GRect bounds = cell_layer->bounds;
+    GRect bounds = layer_get_bounds(cell_layer);
     bounds.origin.x += 5;
     bounds.origin.y -= 4;
     bounds.size.w -= 5;
-    graphics_text_draw(ctx, menu->menu_entries[pos], menu_font, bounds, GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
+    
+    graphics_draw_text(ctx, menu->menu_entries[pos], menu_font, bounds, GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
+    
+
 }
 
 static void selection_changed(struct MenuLayer *menu_layer, MenuIndex new_index, MenuIndex old_index, void *callback_context) {
