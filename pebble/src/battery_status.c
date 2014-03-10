@@ -120,6 +120,18 @@ static void window_load_b(Window* window) {
 
 static void window_unload_b(Window* window) {
     app_message_deregister_callbacks();
+
+    action_bar_layer_destroy(action_bar);
+    gbitmap_destroy(icon_play);
+    gbitmap_destroy(icon_volume_down);
+    gbitmap_destroy(icon_volume_up);
+    
+    text_layer_destroy(Click_to_play_layer);
+    text_layer_destroy(percentage_layer);
+    text_layer_destroy(status_layer);
+    text_layer_destroy(text_battery_layer);
+
+    layer_destroy(battery_layer);
 	
 }
 
@@ -183,11 +195,13 @@ static void request_battery_data() {
 }
 
 static void app_in_received(DictionaryIterator *received, void* context) {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "recieved something about battery");
     Tuple* tuple = dict_find(received, GET_BATTERY_STATUS_KEY);
     if(tuple) 
 	{		
 		batteryPercent = (int8_t)(tuple->value->data[0]);
 		layer_mark_dirty(battery_layer);
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "tuple->value->data[%d]= %d", 0 , batteryPercent);
 
 		percentText = itoa(batteryPercent);
 		percentText = strcat(percentText, "%");

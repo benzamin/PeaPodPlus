@@ -712,6 +712,14 @@ static void window_load(Window* window) {
 //void handle_deinit(AppContextRef ctx) {
 static void window_unload(Window* window) {
 	app_message_deregister_callbacks();
+    
+    layer_destroy(monthLayer);
+    text_layer_destroy(monthNameLayer);
+    window_destroy(reminderWindow);
+    
+    text_layer_destroy(eventsReminderTextLayer);
+    scroll_layer_destroy(events_scroll_layer);
+
 }
 
 /* INIT */

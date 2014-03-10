@@ -15,21 +15,16 @@ void handle_timer(void *data) {
     
     marquee_text_layer_tick();
     now_playing_animation_tick();
-	//stopwatch_handle_timer(app_ctx, handle, cookie);
 }
 
 static void handle_tick(struct tm *tick_time, TimeUnits units_changed)
 {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "init-handle tick in");
     ipod_state_tick();
     now_playing_tick();
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "init-handle tick Out");
 }
 
 
 static void init() {
-    //resource_init_current_app(&APP_RESOURCES);
-	
 	window = window_create();
   	window_set_background_color(window, GColorWhite);
   	window_set_fullscreen(window, true);
@@ -39,19 +34,10 @@ static void init() {
     init_library_menus();
     ipod_state_init();
     
-    
-	//init_library_menus();
-    //ipod_state_init();
-	
-  	/*window_set_window_handlers(window, (WindowHandlers) {
-    	.load = window_load,
-    	.unload = window_unload
-  });*/
-
 	//register app message
-  	const int inbound_size = 124;
-  	const int outbound_size = 256;
-  	app_message_open(inbound_size, outbound_size);
+  	//const int inbound_size = 124;
+  	//const int outbound_size = 256;
+  	//app_message_open(inbound_size, outbound_size);
 	
 	//register timer
 	app_timer_register(100, handle_timer, NULL);

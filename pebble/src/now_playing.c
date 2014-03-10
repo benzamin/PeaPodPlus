@@ -11,9 +11,9 @@ static MarqueeTextLayer title_layer;
 static MarqueeTextLayer album_layer;
 static MarqueeTextLayer artist_layer;
 static BitmapLayer *album_art_layer;
-static GBitmap album_art_bitmap;
+static GBitmap *album_art_bitmap;
 static uint8_t album_art_data[512];
-static ProgressBarLayer progress_bar;
+static ProgressBarLayer *progress_bar;
 
 // Action bar icons
 static GBitmap *icon_pause = NULL;
@@ -57,7 +57,7 @@ void show_now_playing() {
 }
 
 void now_playing_tick() {
-    progress_bar_layer_set_value(&progress_bar, ipod_state_current_time());
+    progress_bar_layer_set_value(progress_bar, ipod_state_current_time());
 }
 
 void now_playing_animation_tick() {
@@ -105,19 +105,19 @@ static void window_load(Window* window) {
     layer_add_child(window_get_root_layer(window), artist_layer.layer);
     
     // Progress bar
-    progress_bar_layer_init(&progress_bar, GRect(10, 105, 104, 7));
+    progress_bar_layer_init(progress_bar, GRect(10, 105, 104, 7));
     layer_add_child(window_get_root_layer(window), (Layer*)&progress_bar);
     
     // Album art
-    album_art_bitmap = (GBitmap) {
+    album_art_bitmap = &((GBitmap) {
         .addr = album_art_data,
         .bounds = GRect(0, 0, 64, 64),
         .info_flags = 1,
         .row_size_bytes = 8,
-    };
+    });
     //memset(album_art_data, 0, 512);
     album_art_layer = bitmap_layer_create(GRect(30, 35, 64, 64));
-    bitmap_layer_set_bitmap(album_art_layer, &album_art_bitmap);
+    bitmap_layer_set_bitmap(album_art_layer, album_art_bitmap);
     layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(album_art_layer));
     display_no_album();
     
@@ -142,7 +142,17 @@ static void window_unload(Window* window) {
     marquee_text_layer_deinit(&artist_layer);
     app_message_deregister_callbacks();
     
-    // deinit action bar icons
+    // deinit bitmap things
+    bitmap_layer_destroy(album_art_layer);
+    gbitmap_destroy(album_art_bitmap);
+    
+    // Action bar icons
+    gbitmap_destroy(icon_pause);
+    gbitmap_destroy(icon_play);
+    gbitmap_destroy(icon_fast_forward);
+    gbitmap_destroy(icon_rewind);
+    gbitmap_destroy(icon_volume_up);
+    gbitmap_destroy(icon_volume_down);
     
     ipod_state_set_callback(NULL);
     is_shown = false;
@@ -230,8 +240,8 @@ static void state_callback(bool track_data) {
         } else {
             action_bar_layer_set_icon(action_bar, BUTTON_ID_SELECT, icon_play);///
         }
-        progress_bar_layer_set_range(&progress_bar, 0, ipod_state_duration());
-        progress_bar_layer_set_value(&progress_bar, ipod_state_current_time());
+        progress_bar_layer_set_range(progress_bar, 0, ipod_state_duration());
+        progress_bar_layer_set_value(progress_bar, ipod_state_current_time());
     }
 }
 

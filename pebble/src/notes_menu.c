@@ -82,6 +82,14 @@ static void window_load(Window* window) {
 static void window_unload(Window* window) 
 {
 	app_message_deregister_callbacks();
+    
+    window_destroy(detailWindow);
+    
+    text_layer_destroy(errorTextLayer);
+    text_layer_destroy(fullReminderTitleTextLayer);
+    scroll_layer_destroy(scroll_layer);
+
+    simple_menu_layer_destroy(menuLayer);
 }
 
 /* MESSAGE HANDLING */
@@ -113,6 +121,8 @@ static void messageReceivedSuccessfullyCallback(DictionaryIterator *received, vo
 	Tuple* tuple = dict_find(received, GET_SPECIFIC_NOTE_KEY);
     if(tuple)
 	{
+        
+        
 	    size_t offset = tuple->value->data[0] * (MAX_INCOMING_SIZE-1);
         memcpy(noteString + offset, tuple->value->data + 1, tuple->length - 1);
         
@@ -149,7 +159,8 @@ static void messageReceivedSuccessfullyCallback(DictionaryIterator *received, vo
                 continue;
             }
 
-            char *text = (char *)nextElement->value;
+            char *text = (char *)nextElement->value->cstring;
+            APP_LOG(APP_LOG_LEVEL_DEBUG, "tuple->value->data[%d]= %s", i, text);
 
             //addMenuItem(i, text);
 			memcpy(menuList[i], text, (nextElement->length) < (MAX_NOTE_TITLE_LENGTH - 1) ? (nextElement->length) : MAX_NOTE_TITLE_LENGTH - 1 );

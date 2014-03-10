@@ -27,6 +27,8 @@ void ipod_state_init() {
 }
 
 void ipod_state_tick() {
+    //TODO remove it
+    return;
     if(s_playback_state == MPMusicPlaybackStatePlaying) {
         if(s_current_time < s_duration) {
             ++s_current_time;

@@ -86,8 +86,17 @@ static void window_load(Window* window) {
 
 static void window_unload(Window* window) {
 	send_operate_camera(0);
-    action_bar_layer_remove_from_window(action_bar);
+    ///action_bar_layer_remove_from_window(action_bar);
     app_message_deregister_callbacks();
+    
+    action_bar_layer_destroy(action_bar);
+    text_layer_destroy(capture_layer);
+    text_layer_destroy(switch_flash_layer);
+    text_layer_destroy(switch_camera_layer);
+
+    gbitmap_destroy(icon_catpure);
+    gbitmap_destroy(icon_switch_camera);
+    gbitmap_destroy(icon_switch_flash);
 
 }
 

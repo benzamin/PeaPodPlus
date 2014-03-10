@@ -21,8 +21,9 @@ void progress_bar_layer_set_range(ProgressBarLayer* bar, int32_t min, int32_t ma
 }
 
 void progress_bar_layer_set_value(ProgressBarLayer* bar, int32_t value) {
-    bar->value = value;
-    layer_mark_dirty(bar->layer);
+    //bar->value = value;
+    //layer_mark_dirty(bar->layer);
+    //APP_LOG(APP_LOG_LEVEL_DEBUG, "progress bar set value - out");
 }
 
 static void update_proc(Layer* layer, GContext *context) {
